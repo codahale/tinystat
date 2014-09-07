@@ -38,7 +38,7 @@ import (
 
 func main() {
 	var (
-		conf  = flag.Float64("confidence", 95, "confidence level (80, 90, 95, 98, 99, 99.5)")
+		conf  = flag.Float64("confidence", 95, "confidence level")
 		col   = flag.Int("column", 0, "the column of data to analyze")
 		delim = flag.String("delimiter", "tab", "the column delimiter (tab, space)")
 	)
@@ -58,24 +58,6 @@ func main() {
 		delimiter = ' '
 	default:
 		panic(fmt.Sprintf("invalid delimiter: %v", *delim))
-	}
-
-	var confidence tinystat.Confidence
-	switch *conf {
-	case 80:
-		confidence = tinystat.C80
-	case 90:
-		confidence = tinystat.C90
-	case 95:
-		confidence = tinystat.C95
-	case 98:
-		confidence = tinystat.C98
-	case 99:
-		confidence = tinystat.C99
-	case 99.5:
-		confidence = tinystat.C995
-	default:
-		panic(fmt.Sprintf("invalid confidence level: %v", *conf))
 	}
 
 	files := flag.Args()
@@ -119,14 +101,14 @@ func main() {
 			experimental.StdDev,
 		)
 
-		d := tinystat.Compare(control, experimental, confidence)
+		d := tinystat.Compare(control, experimental, *conf)
 		if d.Significant() {
-			fmt.Fprintf(w, "\tDifference at %v confidence!\n", confidence)
+			fmt.Fprintf(w, "\tDifference at %v%% confidence!\n", *conf)
 			fmt.Fprintf(w, "\t\t%10f +/- %10f\n", d.Delta, d.Error)
 			fmt.Fprintf(w, "\t\t%9f%% +/- %9f%%\n", d.PctDelta, d.PctError)
 			fmt.Fprintf(w, "\t\t(Student's t, pooled s = %f)\n", d.PooledStdDev)
 		} else {
-			fmt.Fprintf(w, "\tNo difference proven at %v confidence.\n", confidence)
+			fmt.Fprintf(w, "\tNo difference proven at %v%% confidence.\n", *conf)
 		}
 	}
 	_ = w.Flush()
