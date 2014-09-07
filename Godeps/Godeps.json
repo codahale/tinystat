@@ -1,0 +1,28 @@
+{
+	"ImportPath": "github.com/codahale/tinystat",
+	"GoVersion": "go1.3.1",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "code.google.com/p/go-fn/fn",
+			"Comment": "null-18",
+			"Rev": "74e8374228defc2752ea7dbc393f2a013591969a"
+		},
+		{
+			"ImportPath": "code.google.com/p/probab/dst",
+			"Comment": "null-46",
+			"Rev": "74865851c9a0cbd5e52abae0045cf24aabc6ce86"
+		},
+		{
+			"ImportPath": "code.google.com/p/probab/stat",
+			"Comment": "null-46",
+			"Rev": "74865851c9a0cbd5e52abae0045cf24aabc6ce86"
+		},
+		{
+			"ImportPath": "github.com/skelterjohn/go.matrix",
+			"Rev": "daa59528eefd43623a4c8e36373a86f9eef870a2"
+		}
+	]
+}

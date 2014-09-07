@@ -1,0 +1,7 @@
+Polya PDF, CDF did not pass test for k=25, 40
+
+test of GammaLn CDF
+4 1.210826572900094 -0.8978305
+test of Gamma Qtl #2
+0.2 1.0823704633003444 0.9607058
+0.25 -2.737874865150927 1.109665
