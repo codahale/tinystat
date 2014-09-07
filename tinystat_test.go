@@ -66,12 +66,6 @@ func TestSummarizeEven(t *testing.T) {
 	}
 
 	if v, want := s.StdDev, 1.2909944487358056; v != want {
-	}
-}
-
-func TestConfidenceStringer(t *testing.T) {
-	if v, want := tinystat.C80.String(), "80%"; v != want {
-		t.Errorf("C80 was %q, but expected %q", v, want)
 		t.Errorf("StdDev was %v, but expected %v", v, want)
 	}
 }
@@ -79,13 +73,13 @@ func TestConfidenceStringer(t *testing.T) {
 func TestCompareSimilarData(t *testing.T) {
 	a := tinystat.Summarize([]float64{1, 2, 3, 4})
 	b := tinystat.Summarize([]float64{1, 2, 3, 4})
-	d := tinystat.Compare(a, b, tinystat.C80)
+	d := tinystat.Compare(a, b, 80)
 
 	if v, want := d.Delta, 0.0; v != want {
 		t.Errorf("Delta was %v, but expected %v", v, want)
 	}
 
-	if v, want := d.Error, 1.3145341380123987; v != want {
+	if v, want := d.Error, 1.314311166777796; v != want {
 		t.Errorf("Error was %v, but expected %v", v, want)
 	}
 
@@ -101,13 +95,13 @@ func TestCompareSimilarData(t *testing.T) {
 func TestCompareDifferentData(t *testing.T) {
 	a := tinystat.Summarize([]float64{1, 2, 3, 4})
 	b := tinystat.Summarize([]float64{10, 20, 30, 40})
-	d := tinystat.Compare(a, b, tinystat.C80)
+	d := tinystat.Compare(a, b, 80)
 
 	if v, want := d.Delta, 22.5; v != want {
 		t.Errorf("Delta was %v, but expected %v", v, want)
 	}
 
-	if v, want := d.Error, 9.341520218893711; v != want {
+	if v, want := d.Error, 9.33993571056027; v != want {
 		t.Errorf("Error was %v, but expected %v", v, want)
 	}
 
