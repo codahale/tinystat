@@ -27,55 +27,73 @@ package main
 
 import (
 	"encoding/csv"
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
 	"text/tabwriter"
 
 	"github.com/codahale/tinystat"
+	"github.com/docopt/docopt-go"
 )
 
 func main() {
-	var (
-		conf  = flag.Float64("confidence", 95, "confidence level")
-		col   = flag.Int("column", 0, "the column of data to analyze")
-		delim = flag.String("delimiter", "tab", "the column delimiter (tab, space)")
-	)
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "tinystat helps you conduct experiments.\n\n")
-		fmt.Fprintln(os.Stderr, "Usage: tinystat [OPTIONS] <CONTROL> [EXP1 EXP2 EXP3...]")
-		fmt.Fprintln(os.Stderr, "\nOptions:")
-		flag.PrintDefaults()
+	usage := `tinystat helps you conduct experiments.
+
+Usage:
+  tinystat [options] <control> [<experiment>...]
+
+Arguments:
+  <control>     Input file containing control measurements.
+  <experiment>  Input file containing experimental measurements.
+
+Options:
+  -h --help               Display this usage information.
+  -c --confidence=<pct>   Specify confidence level for analysis. [default: 95]
+  -C --column=<num>       The column to analyze. [default: 0]
+  -d --delimiter=(t|s|c)  Tab, space, or comma delimited data. [default: t]
+`
+
+	args, err := docopt.Parse(usage, nil, true, "", true)
+	if err != nil {
+		panic(err)
 	}
-	flag.Parse()
+
+	confidence, err := strconv.ParseFloat(args["--confidence"].(string), 64)
+	if err != nil {
+		panic(err)
+	}
+
+	column, err := strconv.Atoi(args["--column"].(string))
+	if err != nil {
+		panic(err)
+	}
 
 	var delimiter rune
-	switch *delim {
-	case "tab":
+	switch args["--delimiter"] {
+	case "t":
 		delimiter = '\t'
-	case "space":
+	case "c":
+		delimiter = ','
+	case "s":
 		delimiter = ' '
 	default:
-		panic(fmt.Sprintf("invalid delimiter: %v", *delim))
+		panic("bad delimiter")
 	}
 
-	files := flag.Args()
-	if len(files) < 1 {
-		panic("needs more args")
-	}
+	controlFilename := args["<control>"].(string)
+	experimentFilenames := args["<experiment>"].([]string)
 
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 2, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "Filename\tN\tMin\tMax\tMedian\tMean\tStdDev\t")
 
-	control, err := readFile(files[0], *col, delimiter)
+	control, err := readFile(controlFilename, column, delimiter)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Fprintf(w,
 		"%s\t%.0f\t%f\t%f\t%f\t%f\t%f\t\n",
-		files[0],
+		controlFilename,
 		control.N,
 		control.Min,
 		control.Max,
@@ -84,8 +102,8 @@ func main() {
 		control.StdDev,
 	)
 
-	for _, filename := range files[1:] {
-		experimental, err := readFile(filename, *col, delimiter)
+	for _, filename := range experimentFilenames {
+		experimental, err := readFile(filename, column, delimiter)
 		if err != nil {
 			panic(err)
 		}
@@ -101,14 +119,14 @@ func main() {
 			experimental.StdDev,
 		)
 
-		d := tinystat.Compare(control, experimental, *conf)
+		d := tinystat.Compare(control, experimental, confidence)
 		if d.Significant() {
-			fmt.Fprintf(w, "\tDifference at %v%% confidence!\n", *conf)
+			fmt.Fprintf(w, "\tDifference at %v%% confidence!\n", confidence)
 			fmt.Fprintf(w, "\t\t%10f +/- %10f\n", d.Delta, d.Error)
 			fmt.Fprintf(w, "\t\t%9f%% +/- %9f%%\n", d.PctDelta, d.PctError)
 			fmt.Fprintf(w, "\t\t(Student's t, pooled s = %f)\n", d.PooledStdDev)
 		} else {
-			fmt.Fprintf(w, "\tNo difference proven at %v%% confidence.\n", *conf)
+			fmt.Fprintf(w, "\tNo difference proven at %v%% confidence.\n", confidence)
 		}
 	}
 	_ = w.Flush()
