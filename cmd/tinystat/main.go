@@ -30,15 +30,12 @@
 //          0  +--------------|-----------------------------------------------
 //                         iguana         chameleon       leopard
 //
-//     Filename   N  Min         Max         Median      Mean        StdDev
-//     iguana     7  50.000000   750.000000  200.000000  300.000000  238.047614
-//     chameleon  5  150.000000  930.000000  500.000000  540.000000  299.081929
-//                No difference proven at 95% confidence.
-//     leopard    6  353.000000  1057.000000  619.000000  643.500000  240.093940
-//                Difference at 95% confidence!
-//                  343.500000 +/- 292.634539
-//                  53.379953% +/- 45.475453%
-//                  (Student's t, pooled s = 238.979934)
+//     Experiment  Results
+//     chameleon   No difference proven at 95% confidence.
+//     leopard     Difference at 95% confidence!
+//                   343.500000 +/- 292.634539
+//                   53.379953% +/- 45.475453%
+//                   (Student's t, pooled s = 238.979934)
 //
 // As you can see, despite the superficial differences between the iguana's
 // scores and the chameleon's scores, there is no statistically significant
@@ -47,7 +44,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/csv"
 	"fmt"
 	"os"
@@ -120,75 +116,61 @@ Options:
 	controlFilename := args["<control>"].(string)
 	experimentFilenames := args["<experiment>"].([]string)
 
-	c := chart.BoxChart{}
-	c.XRange.Fixed(-1, 3, 1)
-	c.XRange.Category = append([]string{controlFilename}, experimentFilenames...)
-
-	table := bytes.NewBuffer(nil)
-	w := new(tabwriter.Writer)
-	w.Init(table, 2, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "Filename\tN\tMin\tMax\tMedian\tMean\tStdDev\t")
-
-	control, controlData, err := readFile(controlFilename, column, delimiter)
+	// read the data
+	controlData, err := readFile(controlFilename, column, delimiter)
 	if err != nil {
 		panic(err)
 	}
-	c.AddSet(0, controlData, true)
-	fmt.Fprintf(w,
-		"%s\t%.0f\t%f\t%f\t%f\t%f\t%f\t\n",
-		controlFilename,
-		control.N,
-		control.Min,
-		control.Max,
-		control.Median,
-		control.Mean,
-		control.StdDev,
-	)
 
-	for i, filename := range experimentFilenames {
-		experimental, expData, err := readFile(filename, column, delimiter)
+	experimentData := make(map[string][]float64)
+	for _, filename := range experimentFilenames {
+		expData, err := readFile(filename, column, delimiter)
 		if err != nil {
 			panic(err)
 		}
-
-		c.AddSet(float64(i+1), expData, true)
-
-		fmt.Fprintf(w,
-			"%s\t%.0f\t%f\t%f\t%f\t%f\t%f\t\n",
-			filename,
-			experimental.N,
-			experimental.Min,
-			experimental.Max,
-			experimental.Median,
-			experimental.Mean,
-			experimental.StdDev,
-		)
-
-		d := tinystat.Compare(control, experimental, confidence)
-		if d.Significant() {
-			fmt.Fprintf(w, "\tDifference at %v%% confidence!\n", confidence)
-			fmt.Fprintf(w, "\t\t%10f +/- %10f\n", d.Delta, d.Error)
-			fmt.Fprintf(w, "\t\t%9f%% +/- %9f%%\n", d.Delta*100/experimental.Mean, d.Error*100/experimental.Mean)
-			fmt.Fprintf(w, "\t\t(Student's t, pooled s = %f)\n", d.StdDev)
-		} else {
-			fmt.Fprintf(w, "\tNo difference proven at %v%% confidence.\n", confidence)
-		}
+		experimentData[filename] = expData
 	}
-	_ = w.Flush()
 
+	// chart the data
 	if args["--no-chart"] != true {
+		c := chart.BoxChart{}
+		c.XRange.Fixed(-1, 3, 1)
+		c.XRange.Category = append([]string{controlFilename}, experimentFilenames...)
+		c.AddSet(0, controlData, true)
+		for i, filename := range experimentFilenames {
+			c.AddSet(float64(i+1), experimentData[filename], true)
+		}
+
 		txt := txtg.New(width, height)
 		c.Plot(txt)
 		fmt.Println(txt)
 	}
 
-	fmt.Println(table.String())
+	// compare the data
+	control := tinystat.Summarize(controlData)
+	table := new(tabwriter.Writer)
+	table.Init(os.Stdout, 2, 0, 2, ' ', 0)
+	fmt.Fprintln(table, "Experiment\tResults\t")
+	for _, filename := range experimentFilenames {
+		experimental := tinystat.Summarize(experimentData[filename])
+		d := tinystat.Compare(control, experimental, confidence)
+
+		if d.Significant() {
+			fmt.Fprintf(table, "%s\tDifference at %v%% confidence!\t\n", filename, confidence)
+			fmt.Fprintf(table, "\t  %10f +/- %10f\t\n", d.Delta, d.Error)
+			fmt.Fprintf(table, "\t  %9f%% +/- %9f%%\t\n", d.Delta*100/experimental.Mean, d.Error*100/experimental.Mean)
+			fmt.Fprintf(table, "\t  (Student's t, pooled s = %f)\t\n", d.StdDev)
+		} else {
+			fmt.Fprintf(table, "%s\tNo difference proven at %v%% confidence.\t\n", filename, confidence)
+		}
+	}
+	_ = table.Flush()
 }
 
-func readFile(filename string, col int, del rune) (tinystat.Summary, []float64, error) {
+func readFile(filename string, col int, del rune) ([]float64, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		return tinystat.Summary{}, nil, err
+		return nil, err
 	}
 	defer f.Close()
 
@@ -196,17 +178,17 @@ func readFile(filename string, col int, del rune) (tinystat.Summary, []float64, 
 	r.Comma = del
 	records, err := r.ReadAll()
 	if err != nil {
-		return tinystat.Summary{}, nil, err
+		return nil, err
 	}
 
 	data := make([]float64, len(records))
 	for i, s := range records {
 		n, err := strconv.ParseFloat(s[col], 64)
 		if err != nil {
-			return tinystat.Summary{}, nil, err
+			return nil, err
 		}
 		data[i] = n
 	}
 
-	return tinystat.Summarize(data), data, nil
+	return data, nil
 }

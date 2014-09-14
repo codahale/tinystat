@@ -13,28 +13,12 @@ func TestSummarizeOdd(t *testing.T) {
 		t.Errorf("N was %v, but expected %v", v, want)
 	}
 
-	if v, want := s.Min, 1.0; v != want {
-		t.Errorf("Min was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.Max, 3.0; v != want {
-		t.Errorf("Max was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.Median, 2.0; v != want {
-		t.Errorf("Median was %v, but expected %v", v, want)
-	}
-
 	if v, want := s.Mean, 2.0; v != want {
 		t.Errorf("Mean was %v, but expected %v", v, want)
 	}
 
 	if v, want := s.Variance, 1.0; v != want {
 		t.Errorf("Variance was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.StdDev, 1.0; v != want {
-		t.Errorf("StdDev was %v, but expected %v", v, want)
 	}
 }
 
@@ -45,28 +29,12 @@ func TestSummarizeEven(t *testing.T) {
 		t.Errorf("N was %v, but expected %v", v, want)
 	}
 
-	if v, want := s.Min, 1.0; v != want {
-		t.Errorf("Min was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.Max, 4.0; v != want {
-		t.Errorf("Max was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.Median, 2.5; v != want {
-		t.Errorf("Median was %v, but expected %v", v, want)
-	}
-
 	if v, want := s.Mean, 2.5; v != want {
 		t.Errorf("Mean was %v, but expected %v", v, want)
 	}
 
 	if v, want := s.Variance, 1.6666666666666667; v != want {
 		t.Errorf("Variance was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.StdDev, 1.2909944487358056; v != want {
-		t.Errorf("StdDev was %v, but expected %v", v, want)
 	}
 }
 
