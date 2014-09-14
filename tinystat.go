@@ -53,7 +53,7 @@ func (d Difference) Significant() bool {
 }
 
 // Compare returns the statistical difference between the two summaries using
-// Student's t-test.
+// Student's t-test. The confidence level must be in the range (0, 99).
 func Compare(a, b Summary, confidence float64) Difference {
 	// calculate the quantile for two-sided Student's t
 	t := dst.StudentsTQtlFor(a.N+b.N-2, 1-((1-(confidence/100))/2))
