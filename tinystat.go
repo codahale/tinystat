@@ -7,7 +7,6 @@ import (
 	"sort"
 
 	"code.google.com/p/probab/dst"
-	"code.google.com/p/probab/stat"
 )
 
 // A Summary is a statistical summary of a normally distributed data set.
@@ -23,8 +22,7 @@ type Summary struct {
 
 // Summarize analyzes the given data set and returns a Summary.
 func Summarize(data []float64) Summary {
-	mean, variance := stat.SampleMeanVar(data)
-	min, max := minMax(data)
+	min, max, mean, variance := minMaxMeanVar(data)
 	median := median(data)
 
 	return Summary{
@@ -74,9 +72,13 @@ func Compare(a, b Summary, confidence float64) Difference {
 	}
 }
 
-func minMax(data []float64) (float64, float64) {
-	min, max := math.Inf(1), math.Inf(-1)
-	for _, x := range data {
+func minMaxMeanVar(data []float64) (min float64, max float64, mean float64, variance float64) {
+	min, max = math.Inf(1), math.Inf(-1)
+	m, m2 := 0.0, 0.0
+
+	for n, x := range data {
+		mean += x
+
 		if x < min {
 			min = x
 		}
@@ -84,8 +86,16 @@ func minMax(data []float64) (float64, float64) {
 		if x > max {
 			max = x
 		}
+
+		delta := x - m
+		m += delta / float64(n+1)
+		m2 += delta * (x - m)
 	}
-	return min, max
+
+	mean /= float64(len(data))
+	variance = m2 / float64(len(data)-1)
+
+	return
 }
 
 func median(data []float64) float64 {
