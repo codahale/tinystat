@@ -7,17 +7,37 @@
 // each animal's attempts are measurement error (i.e., normally distributed). We
 // can test for differences as follows:
 //
-//     $ tinystat examples/iguana examples/chameleon examples/leopard
+//     $ tinystat iguana chameleon leopard
 //
-//     Filename            N  Min         Max         Median      Mean        StdDev
-//     examples/iguana     7  50.000000   750.000000  200.000000  300.000000  238.047614
-//     examples/chameleon  5  150.000000  930.000000  500.000000  540.000000  299.081929
-//                         No difference proven at 95% confidence.
-//     examples/leopard    6  700.000000  700.000000  700.000000  700.000000  0.000000
-//                         Difference at 95% confidence!
-//                            400.000000 +/- 215.283224
-//                            57.142857% +/- 30.754746%
-//                            (Student's t, pooled s = 175.809815)
+//       1000  +
+//             |
+//             |                              |
+//             |                        +-----------+
+//             |                        |           |
+//             |              |         |           |
+//             |              |         |           |  +-----*-----+
+//             |              |         |           |
+//             |              |         |     *     |
+//        500  +              |         +-----------+
+//             |              |         |           |
+//             |        +-----------+   |           |
+//             |        |     *     |   |           |
+//             |        |           |   +-----------+
+//             |        +-----------+         |
+//             |        +-----------+         |
+//             |              |
+//          0  +--------------|-----------------------------------------------
+//                         iguana         chameleon       leopard
+//
+//     Filename   N  Min         Max         Median      Mean        StdDev
+//     iguana     7  50.000000   750.000000  200.000000  300.000000  238.047614
+//     chameleon  5  150.000000  930.000000  500.000000  540.000000  299.081929
+//                No difference proven at 95% confidence.
+//     leopard    6  700.000000  700.000000  700.000000  700.000000  0.000000
+//                Difference at 95% confidence!
+//                  400.000000 +/- 215.281773
+//                  57.142857% +/- 30.754539%
+//                  (Student's t, pooled s = 175.809815)
 //
 // As you can see, despite the superficial differences between the iguana's
 // scores and the chameleon's scores, there is no statistically significant
@@ -26,6 +46,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/csv"
 	"fmt"
 	"os"
@@ -34,6 +55,8 @@ import (
 
 	"github.com/codahale/tinystat"
 	"github.com/docopt/docopt-go"
+	"github.com/vdobler/chart"
+	"github.com/vdobler/chart/txtg"
 )
 
 func main() {
@@ -51,6 +74,9 @@ Options:
   -c --confidence=<pct>   Specify confidence level for analysis. [default: 95]
   -C --column=<num>       The column to analyze. [default: 0]
   -d --delimiter=(t|s|c)  Tab, space, or comma delimited data. [default: t]
+  -n --no-chart           Don't display the box chart.
+  -W --width=<chars>      Width of box chart, in characters. [default: 74]
+  -H --height=<chars>     Height of box chart, in characters. [default: 20]
 `
 
 	args, err := docopt.Parse(usage, nil, true, "", true)
@@ -64,6 +90,16 @@ Options:
 	}
 
 	column, err := strconv.Atoi(args["--column"].(string))
+	if err != nil {
+		panic(err)
+	}
+
+	width, err := strconv.Atoi(args["--width"].(string))
+	if err != nil {
+		panic(err)
+	}
+
+	height, err := strconv.Atoi(args["--height"].(string))
 	if err != nil {
 		panic(err)
 	}
@@ -83,14 +119,20 @@ Options:
 	controlFilename := args["<control>"].(string)
 	experimentFilenames := args["<experiment>"].([]string)
 
+	c := chart.BoxChart{}
+	c.XRange.Fixed(-1, 3, 1)
+	c.XRange.Category = append([]string{controlFilename}, experimentFilenames...)
+
+	table := bytes.NewBuffer(nil)
 	w := new(tabwriter.Writer)
-	w.Init(os.Stdout, 2, 0, 2, ' ', 0)
+	w.Init(table, 2, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "Filename\tN\tMin\tMax\tMedian\tMean\tStdDev\t")
 
-	control, err := readFile(controlFilename, column, delimiter)
+	control, controlData, err := readFile(controlFilename, column, delimiter)
 	if err != nil {
 		panic(err)
 	}
+	c.AddSet(0, controlData, true)
 	fmt.Fprintf(w,
 		"%s\t%.0f\t%f\t%f\t%f\t%f\t%f\t\n",
 		controlFilename,
@@ -102,11 +144,13 @@ Options:
 		control.StdDev,
 	)
 
-	for _, filename := range experimentFilenames {
-		experimental, err := readFile(filename, column, delimiter)
+	for i, filename := range experimentFilenames {
+		experimental, expData, err := readFile(filename, column, delimiter)
 		if err != nil {
 			panic(err)
 		}
+
+		c.AddSet(float64(i+1), expData, true)
 
 		fmt.Fprintf(w,
 			"%s\t%.0f\t%f\t%f\t%f\t%f\t%f\t\n",
@@ -130,12 +174,20 @@ Options:
 		}
 	}
 	_ = w.Flush()
+
+	if args["--no-chart"] != true {
+		txt := txtg.New(width, height)
+		c.Plot(txt)
+		fmt.Println(txt)
+	}
+
+	fmt.Println(table.String())
 }
 
-func readFile(filename string, col int, del rune) (tinystat.Summary, error) {
+func readFile(filename string, col int, del rune) (tinystat.Summary, []float64, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		return tinystat.Summary{}, err
+		return tinystat.Summary{}, nil, err
 	}
 	defer f.Close()
 
@@ -143,17 +195,17 @@ func readFile(filename string, col int, del rune) (tinystat.Summary, error) {
 	r.Comma = del
 	records, err := r.ReadAll()
 	if err != nil {
-		return tinystat.Summary{}, err
+		return tinystat.Summary{}, nil, err
 	}
 
 	data := make([]float64, len(records))
 	for i, s := range records {
 		n, err := strconv.ParseFloat(s[col], 64)
 		if err != nil {
-			return tinystat.Summary{}, err
+			return tinystat.Summary{}, nil, err
 		}
 		data[i] = n
 	}
 
-	return tinystat.Summarize(data), nil
+	return tinystat.Summarize(data), data, nil
 }
