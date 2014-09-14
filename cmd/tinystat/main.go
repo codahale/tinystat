@@ -1,6 +1,7 @@
 // tinystat is used to compare two or more sets of measurements (e.g., runs of a
 // multiple runs of benchmarks of two possible implementations) and determine if
-// they are statistically different.
+// they are statistically different. It's inspired largely by FreeBSD's ministat
+// (written by Poul-Henning Kamp).
 //
 // Imagine we have the results of different animals' SAT scores. Each animal
 // took the SATs multiple times, and we're assuming that differences between
