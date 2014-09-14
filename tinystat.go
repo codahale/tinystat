@@ -24,29 +24,8 @@ type Summary struct {
 // Summarize analyzes the given data set and returns a Summary.
 func Summarize(data []float64) Summary {
 	mean, variance := stat.SampleMeanVar(data)
-
-	// calculate min and max
-	min, max := math.Inf(1), math.Inf(-1)
-	for _, x := range data {
-		if x < min {
-			min = x
-		}
-
-		if x > max {
-			max = x
-		}
-	}
-
-	// calculate median
-	var median float64
-	d := make([]float64, len(data))
-	copy(d, data) // don't mutate the argument
-	sort.Float64s(d)
-	if len(d)%2 == 1 {
-		median = d[len(d)/2]
-	} else {
-		median = (d[len(d)/2-1] + d[len(d)/2]) / 2
-	}
+	min, max := minMax(data)
+	median := median(data)
 
 	return Summary{
 		Min:      min,
@@ -93,4 +72,35 @@ func Compare(a, b Summary, confidence float64) Difference {
 		PctError:     e * 100 / b.Mean,
 		PooledStdDev: s,
 	}
+}
+
+func minMax(data []float64) (float64, float64) {
+	min, max := math.Inf(1), math.Inf(-1)
+	for _, x := range data {
+		if x < min {
+			min = x
+		}
+
+		if x > max {
+			max = x
+		}
+	}
+	return min, max
+}
+
+func median(data []float64) float64 {
+	var median float64
+
+	// don't mutate the argument
+	d := make([]float64, len(data))
+	copy(d, data)
+
+	sort.Float64s(d)
+	if len(d)%2 == 1 {
+		median = d[len(d)/2]
+	} else {
+		median = (d[len(d)/2-1] + d[len(d)/2]) / 2
+	}
+
+	return median
 }
