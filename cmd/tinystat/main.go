@@ -69,7 +69,7 @@ Options:
 	}
 
 	var delimiter rune
-	switch args["--delimiter"] {
+	switch d := args["--delimiter"]; d {
 	case "t":
 		delimiter = '\t'
 	case "c":
@@ -77,7 +77,7 @@ Options:
 	case "s":
 		delimiter = ' '
 	default:
-		panic("bad delimiter")
+		panic(fmt.Errorf("bad delimiter: %#v", d))
 	}
 
 	controlFilename := args["<control>"].(string)
