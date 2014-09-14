@@ -48,10 +48,11 @@ func (d Difference) Significant() bool {
 	return d.Delta > d.Error
 }
 
-// Compare returns the statistical difference between the two summaries using
-// Student's t-test. The confidence level must be in the range (0, 99).
+// Compare returns the statistical difference between the two summaries using a
+// two-tailed Student's t-test. The confidence level must be in the range (0,
+// 100).
 func Compare(a, b Summary, confidence float64) Difference {
-	// calculate the quantile for two-sided Student's t
+	// calculate the quantile for two-tailed Student's t
 	t := dst.StudentsTQtlFor(a.N+b.N-2, 1-((1-(confidence/100))/2))
 
 	s := math.Sqrt(
