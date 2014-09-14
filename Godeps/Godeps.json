@@ -28,6 +28,10 @@
 		{
 			"ImportPath": "github.com/skelterjohn/go.matrix",
 			"Rev": "daa59528eefd43623a4c8e36373a86f9eef870a2"
+		},
+		{
+			"ImportPath": "github.com/vdobler/chart",
+			"Rev": "639881fdb30a55a753ae2ae37549bc2be857131e"
 		}
 	]
 }
