@@ -74,11 +74,8 @@ func Compare(a, b Summary, confidence float64) Difference {
 
 func minMaxMeanVar(data []float64) (min float64, max float64, mean float64, variance float64) {
 	min, max = math.Inf(1), math.Inf(-1)
-	m, m2 := 0.0, 0.0
 
 	for n, x := range data {
-		mean += x
-
 		if x < min {
 			min = x
 		}
@@ -87,13 +84,13 @@ func minMaxMeanVar(data []float64) (min float64, max float64, mean float64, vari
 			max = x
 		}
 
-		delta := x - m
-		m += delta / float64(n+1)
-		m2 += delta * (x - m)
+		// Welford algorithm for corrected variance
+		delta := x - mean
+		mean += delta / float64(n+1)
+		variance += delta * (x - mean)
 	}
 
-	mean /= float64(len(data))
-	variance = m2 / float64(len(data)-1)
+	variance /= float64(len(data) - 1) // Bessel's correction
 
 	return
 }
