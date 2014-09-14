@@ -38,11 +38,9 @@ func Summarize(data []float64) Summary {
 
 // Difference represents the statistical difference between two samples.
 type Difference struct {
-	Delta        float64
-	Error        float64
-	PctDelta     float64
-	PctError     float64
-	PooledStdDev float64
+	Delta  float64 // Delta is the difference between the samples' means.
+	Error  float64 // Error is the margin of error at the given confidence level.
+	StdDev float64 // StdDev is the standard deviation of the two samples.
 }
 
 // Significant returns true if the difference is statistically significant.
@@ -64,11 +62,9 @@ func Compare(a, b Summary, confidence float64) Difference {
 	e := t * s * math.Sqrt(1.0/a.N+1.0/b.N)
 
 	return Difference{
-		Delta:        d,
-		Error:        e,
-		PctDelta:     d * 100 / b.Mean,
-		PctError:     e * 100 / b.Mean,
-		PooledStdDev: s,
+		Delta:  d,
+		Error:  e,
+		StdDev: s,
 	}
 }
 

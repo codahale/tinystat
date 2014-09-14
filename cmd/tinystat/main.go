@@ -168,8 +168,8 @@ Options:
 		if d.Significant() {
 			fmt.Fprintf(w, "\tDifference at %v%% confidence!\n", confidence)
 			fmt.Fprintf(w, "\t\t%10f +/- %10f\n", d.Delta, d.Error)
-			fmt.Fprintf(w, "\t\t%9f%% +/- %9f%%\n", d.PctDelta, d.PctError)
-			fmt.Fprintf(w, "\t\t(Student's t, pooled s = %f)\n", d.PooledStdDev)
+			fmt.Fprintf(w, "\t\t%9f%% +/- %9f%%\n", d.Delta*100/experimental.Mean, d.Error*100/experimental.Mean)
+			fmt.Fprintf(w, "\t\t(Student's t, pooled s = %f)\n", d.StdDev)
 		} else {
 			fmt.Fprintf(w, "\tNo difference proven at %v%% confidence.\n", confidence)
 		}

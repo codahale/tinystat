@@ -83,8 +83,8 @@ func TestCompareSimilarData(t *testing.T) {
 		t.Errorf("Error was %v, but expected %v", v, want)
 	}
 
-	if v, want := d.PooledStdDev, 1.2909944487358056; v != want {
-		t.Errorf("PooledStdDev was %v, but expected %v", v, want)
+	if v, want := d.StdDev, 1.2909944487358056; v != want {
+		t.Errorf("StdDev was %v, but expected %v", v, want)
 	}
 
 	if v, want := d.Significant(), false; v != want {
@@ -105,8 +105,8 @@ func TestCompareDifferentData(t *testing.T) {
 		t.Errorf("Error was %v, but expected %v", v, want)
 	}
 
-	if v, want := d.PooledStdDev, 9.17423929634859; v != want {
-		t.Errorf("PooledStdDev was %v, but expected %v", v, want)
+	if v, want := d.StdDev, 9.17423929634859; v != want {
+		t.Errorf("StdDev was %v, but expected %v", v, want)
 	}
 
 	if v, want := d.Significant(), true; v != want {
