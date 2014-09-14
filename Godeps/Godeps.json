@@ -16,11 +16,6 @@
 			"Rev": "74865851c9a0cbd5e52abae0045cf24aabc6ce86"
 		},
 		{
-			"ImportPath": "code.google.com/p/probab/stat",
-			"Comment": "null-46",
-			"Rev": "74865851c9a0cbd5e52abae0045cf24aabc6ce86"
-		},
-		{
 			"ImportPath": "github.com/docopt/docopt-go",
 			"Comment": "0.6.1-1-gc5dac53",
 			"Rev": "c5dac536301992c0371c6115d998fb62944bfad3"

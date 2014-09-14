@@ -1,6 +1,0 @@
-Anscombe, F.J., Glynn, W.J. (1983) Distribution of kurtosis statistic for normal statistics. Biometrika, 70 (1): 227-234.
-Bonett, D.G., Seier, E. (2002) A test of normality with high uniform power. Computational Statistics and Data Analysis, 40: 435-445.
-D’Agostino, R.B. (1970). Transformation to Normality of the Null Distribution of G1. Biometrika,57, 3: 679-681.Geary, R.C. (1936). Moments of the ratio of the mean deviation to the standard deviation for normal samples. Biometrika, 28, 295-307.
-Hahn, G. J., Meeker, W. Q.  (1991) Statistical Intervals: A Guide for Practitioners. J. Wiley & Sons, New York.  
-Jarque, C. M., Bera, A. K. (1980) Efficient test for normality, homoscedasticity and serial independence of residuals, Economic Letters, 6 (3): 255-259.
-Komsta, L.,  Novomestky, F.  (2013). R Package ‘moments’ http://cran.r-project.org/web/packages/moments/index.html
