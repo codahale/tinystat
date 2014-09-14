@@ -96,18 +96,15 @@ func minMaxMeanVar(data []float64) (min float64, max float64, mean float64, vari
 }
 
 func median(data []float64) float64 {
-	var median float64
-
 	// don't mutate the argument
 	d := make([]float64, len(data))
 	copy(d, data)
 
 	sort.Float64s(d)
-	if len(d)%2 == 1 {
-		median = d[len(d)/2]
-	} else {
-		median = (d[len(d)/2-1] + d[len(d)/2]) / 2
-	}
 
-	return median
+	if len(d)%2 == 1 {
+		return d[len(d)/2]
+	}
+	return (d[len(d)/2-1] + d[len(d)/2]) / 2
+
 }
