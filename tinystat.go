@@ -34,9 +34,11 @@ func Summarize(data []float64) Summary {
 
 // Difference represents the statistical difference between two samples.
 type Difference struct {
-	Delta  float64 // Delta is the difference between the samples' means.
-	Error  float64 // Error is the margin of error at the given confidence level.
-	StdDev float64 // StdDev is the standard deviation of the two samples.
+	Delta    float64 // Delta is the difference between the samples' means.
+	Error    float64 // Error is the margin of error at the given confidence level.
+	RelDelta float64 // RelDelta is the ratio of Delta to the control mean.
+	RelError float64 // RelError is the ratio of Error to the control mean.
+	StdDev   float64 // StdDev is the pooled standard deviation of the two samples.
 }
 
 // Significant returns true if the difference is statistically significant.
@@ -47,7 +49,8 @@ func (d Difference) Significant() bool {
 // Compare returns the statistical difference between the two summaries using a
 // two-tailed Student's t-test. The confidence level must be in the range (0,
 // 100).
-func Compare(a, b Summary, confidence float64) Difference {
+func Compare(control, experiment Summary, confidence float64) Difference {
+	a, b := control, experiment
 	t := dst.StudentsTQtlFor(a.N+b.N-2, 1-((1-(confidence/100))/2))
 	s := math.Sqrt(
 		((a.N-1)*a.Variance + (b.N-1)*b.Variance) /
@@ -57,8 +60,10 @@ func Compare(a, b Summary, confidence float64) Difference {
 	e := t * s * math.Sqrt(1.0/a.N+1.0/b.N)
 
 	return Difference{
-		Delta:  d,
-		Error:  e,
-		StdDev: s,
+		Delta:    d,
+		Error:    e,
+		RelDelta: d / control.Mean,
+		RelError: e / control.Mean,
+		StdDev:   s,
 	}
 }

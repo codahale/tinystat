@@ -33,9 +33,9 @@
 //     Experiment  Results
 //     chameleon   No difference proven at 95% confidence.
 //     leopard     Difference at 95% confidence!
-//                   343.500000 +/- 292.634539
-//                   53.379953% +/- 45.475453%
-//                   (Student's t, pooled s = 238.979934)
+//                   343.5 +/- 292.63453863922877
+//                   114.5% +/- 97.54484621307626%
+//                   (Student's t, pooled s = 238.9799344943192)
 //
 // As you can see, despite the superficial differences between the iguana's
 // scores and the chameleon's scores, there is no statistically significant
@@ -157,9 +157,9 @@ Options:
 
 		if d.Significant() {
 			fmt.Fprintf(table, "%s\tDifference at %v%% confidence!\t\n", filename, confidence)
-			fmt.Fprintf(table, "\t  %10f +/- %10f\t\n", d.Delta, d.Error)
-			fmt.Fprintf(table, "\t  %9f%% +/- %9f%%\t\n", d.Delta*100/control.Mean, d.Error*100/control.Mean)
-			fmt.Fprintf(table, "\t  (Student's t, pooled s = %f)\t\n", d.StdDev)
+			fmt.Fprintf(table, "\t  %v +/- %v\t\n", d.Delta, d.Error)
+			fmt.Fprintf(table, "\t  %v%% +/- %v%%\t\n", d.RelDelta*100, d.RelError*100)
+			fmt.Fprintf(table, "\t  (Student's t, pooled s = %v)\t\n", d.StdDev)
 		} else {
 			fmt.Fprintf(table, "%s\tNo difference proven at %v%% confidence.\t\n", filename, confidence)
 		}
