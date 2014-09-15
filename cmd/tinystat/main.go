@@ -158,7 +158,7 @@ Options:
 		if d.Significant() {
 			fmt.Fprintf(table, "%s\tDifference at %v%% confidence!\t\n", filename, confidence)
 			fmt.Fprintf(table, "\t  %10f +/- %10f\t\n", d.Delta, d.Error)
-			fmt.Fprintf(table, "\t  %9f%% +/- %9f%%\t\n", d.Delta*100/experimental.Mean, d.Error*100/experimental.Mean)
+			fmt.Fprintf(table, "\t  %9f%% +/- %9f%%\t\n", d.Delta*100/control.Mean, d.Error*100/control.Mean)
 			fmt.Fprintf(table, "\t  (Student's t, pooled s = %f)\t\n", d.StdDev)
 		} else {
 			fmt.Fprintf(table, "%s\tNo difference proven at %v%% confidence.\t\n", filename, confidence)

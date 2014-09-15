@@ -17,9 +17,9 @@ type Summary struct {
 
 // Summarize analyzes the given data set and returns a Summary.
 func Summarize(data []float64) Summary {
+	// Welford algorithm for corrected variance
 	var m, m2 float64
 	for n, x := range data {
-		// Welford algorithm for corrected variance
 		delta := x - m
 		m += delta / float64(n+1)
 		m2 += delta * (x - m)
@@ -48,9 +48,7 @@ func (d Difference) Significant() bool {
 // two-tailed Student's t-test. The confidence level must be in the range (0,
 // 100).
 func Compare(a, b Summary, confidence float64) Difference {
-	// calculate the quantile for two-tailed Student's t
 	t := dst.StudentsTQtlFor(a.N+b.N-2, 1-((1-(confidence/100))/2))
-
 	s := math.Sqrt(
 		((a.N-1)*a.Variance + (b.N-1)*b.Variance) /
 			(a.N + b.N - 2),
