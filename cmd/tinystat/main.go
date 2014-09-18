@@ -153,24 +153,36 @@ Options:
 	}
 
 	// compare the data
-	control := tinystat.Summarize(controlData)
-	table := new(tabwriter.Writer)
-	table.Init(os.Stdout, 2, 0, 2, ' ', 0)
-	fmt.Fprintln(table, "Experiment\tResults\t")
-	for _, filename := range experimentFilenames {
-		experimental := tinystat.Summarize(experimentData[filename])
-		d := tinystat.Compare(control, experimental, confidence)
+	if len(experimentFilenames) > 0 {
+		control := tinystat.Summarize(controlData)
+		table := new(tabwriter.Writer)
+		table.Init(os.Stdout, 2, 0, 2, ' ', 0)
+		fmt.Fprintln(table, "Experiment\tResults\t")
+		for _, filename := range experimentFilenames {
+			experimental := tinystat.Summarize(experimentData[filename])
+			d := tinystat.Compare(control, experimental, confidence)
 
-		if d.Significant() {
-			fmt.Fprintf(table, "%s\tDifference at %v%% confidence!\t\n", filename, confidence)
-			fmt.Fprintf(table, "\t  %v +/- %v\t\n", d.Delta, d.Error)
-			fmt.Fprintf(table, "\t  %v%% +/- %v%%\t\n", d.RelDelta*100, d.RelError*100)
-			fmt.Fprintf(table, "\t  (Student's t, pooled s = %v)\t\n", d.StdDev)
-		} else {
-			fmt.Fprintf(table, "%s\tNo difference proven at %v%% confidence.\t\n", filename, confidence)
+			if d.Significant() {
+				fmt.Fprintf(table,
+					"%s\tDifference at %v%% confidence!\t\n",
+					filename, confidence)
+				fmt.Fprintf(table,
+					"\t  %v +/- %v\t\n",
+					d.Delta, d.Error)
+				fmt.Fprintf(table,
+					"\t  %v%% +/- %v%%\t\n",
+					d.RelDelta*100, d.RelError*100)
+				fmt.Fprintf(table,
+					"\t  (Student's t, pooled s = %v)\t\n",
+					d.StdDev)
+			} else {
+				fmt.Fprintf(table,
+					"%s\tNo difference proven at %v%% confidence.\t\n",
+					filename, confidence)
+			}
 		}
+		_ = table.Flush()
 	}
-	_ = table.Flush()
 }
 
 func readFile(filename string, col int, del rune) ([]float64, error) {
