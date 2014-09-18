@@ -47,6 +47,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"path"
 	"strconv"
 	"text/tabwriter"
 
@@ -134,8 +135,13 @@ Options:
 	// chart the data
 	if args["--no-chart"] != true {
 		c := chart.BoxChart{}
-		c.XRange.Fixed(-1, 3, 1)
-		c.XRange.Category = append([]string{controlFilename}, experimentFilenames...)
+		c.XRange.Fixed(-1, float64(len(experimentFilenames))+1, 1)
+		c.XRange.Category = make([]string, len(experimentFilenames)+1)
+		c.XRange.Category[0] = path.Base(controlFilename)
+		for i, file := range experimentFilenames {
+			c.XRange.Category[i+1] = path.Base(file)
+		}
+
 		c.AddSet(0, controlData, true)
 		for i, filename := range experimentFilenames {
 			c.AddSet(float64(i+1), experimentData[filename], true)
