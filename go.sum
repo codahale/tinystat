@@ -1,0 +1,6 @@
+github.com/datastream/go-fn v0.0.0-20130403065544-37331e464987 h1:S3JwKvmPJITKLLH7r3WYbBLjXu4lEZU9gFBLj01zaNU=
+github.com/datastream/go-fn v0.0.0-20130403065544-37331e464987/go.mod h1:bJl2ftsgvIWNGkufh7xMrXAATJUEdner7/2wCuHmVLI=
+github.com/datastream/probab v0.0.0-20150902151906-d47400db423d h1:wnkyVc4CQO5XlqF4RW4+y9qN05xY/frZn0IiT4Gi0qc=
+github.com/datastream/probab v0.0.0-20150902151906-d47400db423d/go.mod h1:qktd+m4xKlvhKU9bN9YipjWd79+vYDYb+N85egJl/NM=
+github.com/skelterjohn/go.matrix v0.0.0-20130517144113-daa59528eefd h1:+ZLYzP9SYC3WU9buyb9H0l9DQxqVFOCkDG8QnNBMAlA=
+github.com/skelterjohn/go.matrix v0.0.0-20130517144113-daa59528eefd/go.mod h1:x7ui0Rh4QxcWEOgIfa3cr9q4W/wyLTDdzISxBmLVeX8=
