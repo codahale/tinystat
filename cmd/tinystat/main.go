@@ -77,7 +77,7 @@ Options:
   -H --height=<chars>     Height of box chart, in characters. [default: 20]
 `
 
-	args, err := docopt.Parse(usage, nil, true, "", true)
+	args, err := docopt.ParseDoc(usage)
 	if err != nil {
 		panic(err)
 	}
@@ -157,26 +157,26 @@ Options:
 		control := tinystat.Summarize(controlData)
 		table := new(tabwriter.Writer)
 		table.Init(os.Stdout, 2, 0, 2, ' ', 0)
-		fmt.Fprintln(table, "Experiment\tResults\t")
+		_, _ = fmt.Fprintln(table, "Experiment\tResults\t")
 		for _, filename := range experimentFilenames {
 			experimental := tinystat.Summarize(experimentData[filename])
 			d := tinystat.Compare(control, experimental, confidence)
 
 			if d.Significant() {
-				fmt.Fprintf(table,
+				_, _ = fmt.Fprintf(table,
 					"%s\tDifference at %v%% confidence!\t\n",
 					filename, confidence)
-				fmt.Fprintf(table,
+				_, _ = fmt.Fprintf(table,
 					"\t  %v +/- %v\t\n",
 					d.Delta, d.Error)
-				fmt.Fprintf(table,
+				_, _ = fmt.Fprintf(table,
 					"\t  %v%% +/- %v%%\t\n",
 					d.RelDelta*100, d.RelError*100)
-				fmt.Fprintf(table,
+				_, _ = fmt.Fprintf(table,
 					"\t  (Student's t, pooled s = %v)\t\n",
 					d.StdDev)
 			} else {
-				fmt.Fprintf(table,
+				_, _ = fmt.Fprintf(table,
 					"%s\tNo difference proven at %v%% confidence.\t\n",
 					filename, confidence)
 			}
@@ -190,7 +190,7 @@ func readFile(filename string, col int, del rune) ([]float64, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	r := csv.NewReader(f)
 	r.Comma = del
