@@ -5,7 +5,7 @@ package tinystat
 import (
 	"math"
 
-	"code.google.com/p/probab/dst"
+	"github.com/datastream/probab/dst"
 )
 
 // A Summary is a statistical summary of a normally distributed data set.
