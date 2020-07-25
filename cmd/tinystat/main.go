@@ -45,6 +45,7 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"os"
 	"path"
@@ -52,80 +53,38 @@ import (
 	"text/tabwriter"
 
 	"github.com/codahale/tinystat"
-	"github.com/docopt/docopt-go"
 	"github.com/vdobler/chart"
 	"github.com/vdobler/chart/txtg"
 )
 
+var (
+	confidence = flag.Float64("confidence", 95, "confidence level for analysis (0,100)")
+	column     = flag.Int("column", 0, "the CSV column to analyze")
+	delimiter  = flag.String("delimiter", ",", "the CSV delimiter to use")
+	noChart    = flag.Bool("no_chart", false, "don't display the box chart")
+	width      = flag.Int("width", 74, "width of box chart, in chars")
+	height     = flag.Int("height", 20, "height of box chart, in chars")
+)
+
 func main() {
-	usage := `tinystat helps you conduct experiments.
+	flag.Parse()
 
-Usage:
-  tinystat [options] <control> [<experiment>...]
-
-Arguments:
-  <control>     Input file containing control measurements.
-  <experiment>  Input file containing experimental measurements.
-
-Options:
-  -h --help               Display this usage information.
-  -c --confidence=<pct>   Specify confidence level for analysis. [default: 95]
-  -C --column=<num>       The column to analyze. [default: 0]
-  -d --delimiter=(t|s|c)  Tab, space, or comma delimited data. [default: t]
-  -n --no-chart           Don't display the box chart.
-  -W --width=<chars>      Width of box chart, in characters. [default: 74]
-  -H --height=<chars>     Height of box chart, in characters. [default: 20]
-`
-
-	args, err := docopt.ParseDoc(usage)
-	if err != nil {
-		panic(err)
+	if len(flag.Args()) < 1 {
+		flag.Usage()
 	}
 
-	confidence, err := strconv.ParseFloat(args["--confidence"].(string), 64)
-	if err != nil {
-		panic(err)
-	}
-
-	column, err := strconv.Atoi(args["--column"].(string))
-	if err != nil {
-		panic(err)
-	}
-
-	width, err := strconv.Atoi(args["--width"].(string))
-	if err != nil {
-		panic(err)
-	}
-
-	height, err := strconv.Atoi(args["--height"].(string))
-	if err != nil {
-		panic(err)
-	}
-
-	var delimiter rune
-	switch d := args["--delimiter"]; d {
-	case "t":
-		delimiter = '\t'
-	case "c":
-		delimiter = ','
-	case "s":
-		delimiter = ' '
-	default:
-		panic(fmt.Errorf("bad delimiter: %#v", d))
-	}
-
-	controlFilename := args["<control>"].(string)
-	experimentFilenames := args["<experiment>"].([]string)
+	controlFilename := flag.Arg(0)
+	experimentFilenames := flag.Args()[1:]
 
 	// read the data
-	controlData, err := readFile(controlFilename, column, delimiter)
+	controlData, err := readFile(controlFilename, *column, *delimiter)
 	if err != nil {
 		panic(err)
 	}
 
 	experimentData := make(map[string][]float64)
 	for _, filename := range experimentFilenames {
-		expData, err := readFile(filename, column, delimiter)
+		expData, err := readFile(filename, *column, *delimiter)
 		if err != nil {
 			panic(err)
 		}
@@ -133,7 +92,7 @@ Options:
 	}
 
 	// chart the data
-	if args["--no-chart"] != true {
+	if !*noChart {
 		c := chart.BoxChart{}
 		c.XRange.Fixed(-1, float64(len(experimentFilenames))+1, 1)
 		c.XRange.Category = make([]string, len(experimentFilenames)+1)
@@ -147,7 +106,7 @@ Options:
 			c.AddSet(float64(i+1), experimentData[filename], true)
 		}
 
-		txt := txtg.New(width, height)
+		txt := txtg.New(*width, *height)
 		c.Plot(txt)
 		fmt.Println(txt)
 	}
@@ -160,12 +119,12 @@ Options:
 		_, _ = fmt.Fprintln(table, "Experiment\tResults\t")
 		for _, filename := range experimentFilenames {
 			experimental := tinystat.Summarize(experimentData[filename])
-			d := tinystat.Compare(control, experimental, confidence)
+			d := tinystat.Compare(control, experimental, *confidence)
 
 			if d.Significant() {
 				_, _ = fmt.Fprintf(table,
 					"%s\tDifference at %v%% confidence!\t\n",
-					filename, confidence)
+					filename, *confidence)
 				_, _ = fmt.Fprintf(table,
 					"\t  %v +/- %v\t\n",
 					d.Delta, d.Error)
@@ -178,14 +137,14 @@ Options:
 			} else {
 				_, _ = fmt.Fprintf(table,
 					"%s\tNo difference proven at %v%% confidence.\t\n",
-					filename, confidence)
+					filename, *confidence)
 			}
 		}
 		_ = table.Flush()
 	}
 }
 
-func readFile(filename string, col int, del rune) ([]float64, error) {
+func readFile(filename string, col int, del string) ([]float64, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -193,7 +152,7 @@ func readFile(filename string, col int, del rune) ([]float64, error) {
 	defer func() { _ = f.Close() }()
 
 	r := csv.NewReader(f)
-	r.Comma = del
+	r.Comma = []rune(del)[0]
 	records, err := r.ReadAll()
 	if err != nil {
 		return nil, err
