@@ -5,7 +5,7 @@ package tinystat
 import (
 	"math"
 
-	"github.com/datastream/probab/dst"
+	"gonum.org/v1/gonum/stat/distuv"
 )
 
 // A Summary is a statistical summary of a normally distributed data set.
@@ -51,7 +51,14 @@ func (d Difference) Significant() bool {
 // 100).
 func Compare(control, experiment Summary, confidence float64) Difference {
 	a, b := control, experiment
-	t := dst.StudentsTQtlFor(a.N+b.N-2, 1-((1-(confidence/100))/2))
+	nu := a.N + b.N - 2
+
+	dist := distuv.StudentsT{
+		Mu:    0,
+		Sigma: 1,
+		Nu:    nu,
+	}
+	t := dist.Quantile(1 - ((1 - (confidence / 100)) / 2))
 	s := math.Sqrt(
 		((a.N-1)*a.Variance + (b.N-1)*b.Variance) /
 			(a.N + b.N - 2),

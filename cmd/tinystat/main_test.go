@@ -6,10 +6,12 @@ import (
 	"strings"
 	"testing"
 	"unicode"
+
+	"github.com/codahale/tinystat/internal/assert"
 )
 
 func TestControlOnly(t *testing.T) {
-	expected := `
+	want := `
    800  +
         |
         |                              |
@@ -31,14 +33,11 @@ func TestControlOnly(t *testing.T) {
                                     iguana
 
 `
-	actual := mainTest(t, "../../examples/iguana")
-	if actual != expected {
-		t.Errorf("Output was \n%q\n but expected \n%q", actual, expected)
-	}
+	assert.Equal(t, "Output", want, mainTest(t, "../../examples/iguana"))
 }
 
 func TestOneExperiment(t *testing.T) {
-	expected := `
+	want := `
   1000  +
         |
         |                                        |
@@ -62,14 +61,12 @@ func TestOneExperiment(t *testing.T) {
 Experiment                Results
 ../../examples/chameleon  No difference proven at 95% confidence.
 `
-	actual := mainTest(t, "../../examples/iguana", "../../examples/chameleon")
-	if actual != expected {
-		t.Errorf("Output was \n%q\n but expected \n%q", actual, expected)
-	}
+	assert.Equal(t, "Output", want,
+		mainTest(t, "../../examples/iguana", "../../examples/chameleon"))
 }
 
 func TestTwoExperiments(t *testing.T) {
-	expected := `
+	want := `
  1.5 k  +
         |
         |
@@ -93,18 +90,16 @@ func TestTwoExperiments(t *testing.T) {
 Experiment                Results
 ../../examples/chameleon  No difference proven at 95% confidence.
 ../../examples/leopard    Difference at 95% confidence!
-                            343.5 +/- 292.63453863922877
-                            114.5% +/- 97.54484621307626%
+                            343.5 +/- 292.6345386382977
+                            114.5% +/- 97.54484621276592%
                             (Student's t, pooled s = 238.9799344943192)
 `
-	actual := mainTest(t,
-		"../../examples/iguana",
-		"../../examples/chameleon",
-		"../../examples/leopard",
-	)
-	if actual != expected {
-		t.Errorf("Output was \n%q\n but expected \n%q", actual, expected)
-	}
+	assert.Equal(t, "Output", want,
+		mainTest(t,
+			"../../examples/iguana",
+			"../../examples/chameleon",
+			"../../examples/leopard",
+		))
 }
 
 func mainTest(t *testing.T, args ...string) string {
@@ -115,7 +110,7 @@ func mainTest(t *testing.T, args ...string) string {
 		t.Fatal(err)
 	}
 	defer func() {
-		f.Close()
+		_ = f.Close()
 	}()
 
 	oldStdout := os.Stdout

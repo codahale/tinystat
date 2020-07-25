@@ -4,38 +4,24 @@ import (
 	"testing"
 
 	"github.com/codahale/tinystat"
+	"github.com/codahale/tinystat/internal/assert"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestSummarizeOdd(t *testing.T) {
 	s := tinystat.Summarize([]float64{1, 2, 3})
 
-	if v, want := s.N, 3.0; v != want {
-		t.Errorf("N was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.Mean, 2.0; v != want {
-		t.Errorf("Mean was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.Variance, 1.0; v != want {
-		t.Errorf("Variance was %v, but expected %v", v, want)
-	}
+	assert.Equal(t, "N", 3.0, s.N, epsilon)
+	assert.Equal(t, "Mean", 2.0, s.Mean, epsilon)
+	assert.Equal(t, "Variance", 1.0, s.Variance, epsilon)
 }
 
 func TestSummarizeEven(t *testing.T) {
 	s := tinystat.Summarize([]float64{1, 2, 3, 4})
 
-	if v, want := s.N, 4.0; v != want {
-		t.Errorf("N was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.Mean, 2.5; v != want {
-		t.Errorf("Mean was %v, but expected %v", v, want)
-	}
-
-	if v, want := s.Variance, 1.6666666666666667; v != want {
-		t.Errorf("Variance was %v, but expected %v", v, want)
-	}
+	assert.Equal(t, "N", 4.0, s.N, epsilon)
+	assert.Equal(t, "Mean", 2.5, s.Mean, epsilon)
+	assert.Equal(t, "Variance", 1.6666, s.Variance, epsilon)
 }
 
 func TestCompareSimilarData(t *testing.T) {
@@ -43,29 +29,12 @@ func TestCompareSimilarData(t *testing.T) {
 	b := tinystat.Summarize([]float64{1, 2, 3, 4})
 	d := tinystat.Compare(a, b, 80)
 
-	if v, want := d.Delta, 0.0; v != want {
-		t.Errorf("Delta was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.Error, 1.314311166777796; v != want {
-		t.Errorf("Error was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.RelDelta, 0.0; v != want {
-		t.Errorf("RelDelta was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.RelError, 0.5257244667111184; v != want {
-		t.Errorf("RelError was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.StdDev, 1.2909944487358056; v != want {
-		t.Errorf("StdDev was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.Significant(), false; v != want {
-		t.Errorf("Significance was %v, but expected %v", v, want)
-	}
+	assert.Equal(t, "Delta", 0.0, d.Delta, epsilon)
+	assert.Equal(t, "Error", 1.314, d.Error, epsilon)
+	assert.Equal(t, "RelDelta", 0.0, d.RelDelta, epsilon)
+	assert.Equal(t, "RelError", 0.5257, d.RelError, epsilon)
+	assert.Equal(t, "StdDev", 1.29099, d.StdDev, epsilon)
+	assert.Equal(t, "Significant", false, d.Significant())
 }
 
 func TestCompareDifferentData(t *testing.T) {
@@ -73,27 +42,12 @@ func TestCompareDifferentData(t *testing.T) {
 	b := tinystat.Summarize([]float64{10, 20, 30, 40})
 	d := tinystat.Compare(a, b, 80)
 
-	if v, want := d.Delta, 22.5; v != want {
-		t.Errorf("Delta was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.Error, 9.33993571056027; v != want {
-		t.Errorf("Error was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.RelDelta, 9.0; v != want {
-		t.Errorf("RelDelta was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.RelError, 3.7359742842241084; v != want {
-		t.Errorf("RelError was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.StdDev, 9.17423929634859; v != want {
-		t.Errorf("StdDev was %v, but expected %v", v, want)
-	}
-
-	if v, want := d.Significant(), true; v != want {
-		t.Errorf("Significance was %v, but expected %v", v, want)
-	}
+	assert.Equal(t, "Delta", 22.5, d.Delta, epsilon)
+	assert.Equal(t, "Error", 9.33993, d.Error, epsilon)
+	assert.Equal(t, "RelDelta", 9.0, d.RelDelta, epsilon)
+	assert.Equal(t, "RelError", 3.7359, d.RelError, epsilon)
+	assert.Equal(t, "StdDev", 9.1742, d.StdDev, epsilon)
+	assert.Equal(t, "Significant", true, d.Significant())
 }
+
+var epsilon = cmpopts.EquateApprox(0.001, 0.001)
