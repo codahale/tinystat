@@ -1,0 +1,21 @@
+builds:
+  - env:
+      - CGO_ENABLED=0
+    dir: ./cmd/tinystat
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+archives:
+  - format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  skip: true
