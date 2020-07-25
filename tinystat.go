@@ -19,6 +19,7 @@ type Summary struct {
 func Summarize(data []float64) Summary {
 	// Welford algorithm for corrected variance
 	var m, m2 float64
+
 	for n, x := range data {
 		delta := x - m
 		m += delta / float64(n+1)

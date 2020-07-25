@@ -57,6 +57,7 @@ import (
 	"github.com/vdobler/chart/txtg"
 )
 
+//nolint:gochecknoglobals // main package
 var (
 	confidence = flag.Float64("confidence", 95, "confidence level for analysis (0,100)")
 	column     = flag.Int("column", 0, "the CSV column to analyze")
@@ -77,38 +78,11 @@ func main() {
 	experimentFilenames := flag.Args()[1:]
 
 	// read the data
-	controlData, err := readFile(controlFilename, *column, *delimiter)
-	if err != nil {
-		panic(err)
-	}
-
-	experimentData := make(map[string][]float64)
-	for _, filename := range experimentFilenames {
-		expData, err := readFile(filename, *column, *delimiter)
-		if err != nil {
-			panic(err)
-		}
-		experimentData[filename] = expData
-	}
+	controlData, experimentData := readData(controlFilename, experimentFilenames)
 
 	// chart the data
 	if !*noChart {
-		c := chart.BoxChart{}
-		c.XRange.Fixed(-1, float64(len(experimentFilenames))+1, 1)
-		c.XRange.Category = make([]string, len(experimentFilenames)+1)
-		c.XRange.Category[0] = path.Base(controlFilename)
-		for i, file := range experimentFilenames {
-			c.XRange.Category[i+1] = path.Base(file)
-		}
-
-		c.AddSet(0, controlData, true)
-		for i, filename := range experimentFilenames {
-			c.AddSet(float64(i+1), experimentData[filename], true)
-		}
-
-		txt := txtg.New(*width, *height)
-		c.Plot(txt)
-		fmt.Println(txt)
+		printChart(experimentFilenames, controlFilename, controlData, experimentData)
 	}
 
 	// compare the data
@@ -117,6 +91,7 @@ func main() {
 		table := new(tabwriter.Writer)
 		table.Init(os.Stdout, 2, 0, 2, ' ', 0)
 		_, _ = fmt.Fprintln(table, "Experiment\tResults\t")
+
 		for _, filename := range experimentFilenames {
 			experimental := tinystat.Summarize(experimentData[filename])
 			d := tinystat.Compare(control, experimental, *confidence)
@@ -140,8 +115,53 @@ func main() {
 					filename, *confidence)
 			}
 		}
+
 		_ = table.Flush()
 	}
+}
+
+func readData(controlFilename string, experimentFilenames []string) ([]float64, map[string][]float64) {
+	controlData, err := readFile(controlFilename, *column, *delimiter)
+	if err != nil {
+		panic(err)
+	}
+
+	experimentData := make(map[string][]float64)
+
+	for _, filename := range experimentFilenames {
+		expData, err := readFile(filename, *column, *delimiter)
+		if err != nil {
+			panic(err)
+		}
+
+		experimentData[filename] = expData
+	}
+
+	return controlData, experimentData
+}
+
+func printChart(
+	experimentFilenames []string, controlFilename string, controlData []float64,
+	experimentData map[string][]float64,
+) {
+	c := chart.BoxChart{}
+	c.XRange.Fixed(-1, float64(len(experimentFilenames))+1, 1)
+	c.XRange.Category = make([]string, len(experimentFilenames)+1)
+	c.XRange.Category[0] = path.Base(controlFilename)
+
+	for i, file := range experimentFilenames {
+		c.XRange.Category[i+1] = path.Base(file)
+	}
+
+	c.AddSet(0, controlData, true)
+
+	for i, filename := range experimentFilenames {
+		c.AddSet(float64(i+1), experimentData[filename], true)
+	}
+
+	txt := txtg.New(*width, *height)
+	c.Plot(txt)
+	fmt.Println(txt)
 }
 
 func readFile(filename string, col int, del string) ([]float64, error) {
@@ -149,21 +169,25 @@ func readFile(filename string, col int, del string) ([]float64, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer func() { _ = f.Close() }()
 
 	r := csv.NewReader(f)
 	r.Comma = []rune(del)[0]
+
 	records, err := r.ReadAll()
 	if err != nil {
 		return nil, err
 	}
 
 	data := make([]float64, len(records))
+
 	for i, s := range records {
 		n, err := strconv.ParseFloat(s[col], 64)
 		if err != nil {
 			return nil, err
 		}
+
 		data[i] = n
 	}
 

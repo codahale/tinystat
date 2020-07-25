@@ -1,0 +1,73 @@
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - exhaustive
+    - exportloopref
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - goerr113
+    - gofmt
+    - gofumpt
+    - goimports
+    - golint
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - lll
+    - maligned
+    - misspell
+    - nakedret
+    - nestif
+    - noctx
+    - nolintlint
+    - prealloc
+    - rowserrcheck
+    - scopelint
+    - sqlclosecheck
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace
+    - wsl
+#    - goheader
+#    - gomnd
+#    - testpackage
+#    - typecheck
+
+linters-settings:
+  funlen:
+    lines: 150
+  gocognit:
+    min-complexity: 10
+  gocyclo:
+    min-complexity: 10
+  maligned:
+    suggest-new: true
+  nolintlint:
+    allow-leading-space: false
+    require-explanation: true
+    require-specific: true
+  wsl:
+    force-err-cuddling: true

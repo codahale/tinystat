@@ -109,15 +109,19 @@ func mainTest(t *testing.T, args ...string) string {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	defer func() {
 		_ = f.Close()
 	}()
 
 	oldStdout := os.Stdout
+
 	defer func() {
 		os.Stdout = oldStdout
 	}()
+
 	os.Stdout = f
+
 	main()
 
 	stdout, err := ioutil.ReadFile(f.Name())
@@ -130,5 +134,6 @@ func mainTest(t *testing.T, args ...string) string {
 	for i, line := range lines {
 		lines[i] = strings.TrimRightFunc(line, unicode.IsSpace)
 	}
+
 	return strings.Join(lines, "\n")
 }

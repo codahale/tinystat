@@ -50,4 +50,4 @@ func TestCompareDifferentData(t *testing.T) {
 	assert.Equal(t, "Significant", true, d.Significant())
 }
 
-var epsilon = cmpopts.EquateApprox(0.001, 0.001)
+var epsilon = cmpopts.EquateApprox(0.001, 0.001) //nolint:gochecknoglobals // testing
