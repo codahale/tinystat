@@ -68,17 +68,27 @@ var (
 )
 
 func main() {
+	flag.Usage = func() {
+		_, _ = fmt.Fprintf(os.Stderr, "Usage: tinystat <control.csv> [<experiment.csv>...] [options] \n\n")
+
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 
 	if len(flag.Args()) < 1 {
 		flag.Usage()
+		os.Exit(-1)
 	}
 
 	controlFilename := flag.Arg(0)
 	experimentFilenames := flag.Args()[1:]
 
 	// read the data
-	controlData, experimentData := readData(controlFilename, experimentFilenames)
+	controlData, experimentData, err := readData(controlFilename, experimentFilenames)
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(-1)
+	}
 
 	// chart the data
 	if !*noChart {
@@ -120,10 +130,10 @@ func main() {
 	}
 }
 
-func readData(controlFilename string, experimentFilenames []string) ([]float64, map[string][]float64) {
+func readData(controlFilename string, experimentFilenames []string) ([]float64, map[string][]float64, error) {
 	controlData, err := readFile(controlFilename, *column, *delimiter)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
 	experimentData := make(map[string][]float64)
@@ -131,13 +141,13 @@ func readData(controlFilename string, experimentFilenames []string) ([]float64, 
 	for _, filename := range experimentFilenames {
 		expData, err := readFile(filename, *column, *delimiter)
 		if err != nil {
-			panic(err)
+			return nil, nil, err
 		}
 
 		experimentData[filename] = expData
 	}
 
-	return controlData, experimentData
+	return controlData, experimentData, nil
 }
 
 func printChart(
