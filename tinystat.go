@@ -17,19 +17,13 @@ type Summary struct {
 
 // Summarize analyzes the given data set and returns a Summary.
 func Summarize(data []float64) Summary {
-	// Welford algorithm for corrected variance
-	var m, m2 float64
-
-	for n, x := range data {
-		delta := x - m
-		m += delta / float64(n+1)
-		m2 += delta * (x - m)
-	}
+	n := float64(len(data))
+	m, v := meanAndVariance(data, n)
 
 	return Summary{
 		Mean:     m,
-		Variance: m2 / float64(len(data)-1), // Bessel's correction
-		N:        float64(len(data)),
+		Variance: v,
+		N:        n,
 	}
 }
 
@@ -53,17 +47,12 @@ func (d Difference) Significant() bool {
 func Compare(control, experiment Summary, confidence float64) Difference {
 	a, b := control, experiment
 	nu := a.N + b.N - 2
-
-	dist := distuv.StudentsT{
-		Mu:    0,
+	t := distuv.StudentsT{
+		Mu:    0, // Standard parameters for Student's T.
 		Sigma: 1,
 		Nu:    nu,
-	}
-	t := dist.Quantile(1 - ((1 - (confidence / 100)) / 2))
-	s := math.Sqrt(
-		((a.N-1)*a.Variance + (b.N-1)*b.Variance) /
-			(a.N + b.N - 2),
-	)
+	}.Quantile(1 - ((1 - (confidence / 100)) / 2))
+	s := math.Sqrt(((a.N-1)*a.Variance + (b.N-1)*b.Variance) / nu)
 	d := math.Abs(a.Mean - b.Mean)
 	e := t * s * math.Sqrt(1.0/a.N+1.0/b.N)
 
@@ -74,4 +63,17 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 		RelError: e / control.Mean,
 		StdDev:   s,
 	}
+}
+
+func meanAndVariance(data []float64, n float64) (float64, float64) {
+	var m, m2 float64
+
+	// Welford algorithm for corrected variance
+	for i, x := range data {
+		delta := x - m
+		m += delta / float64(i+1)
+		m2 += delta * (x - m)
+	}
+
+	return m, m2 / (n - 1) // Bessel's correction
 }
