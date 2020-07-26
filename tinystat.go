@@ -20,11 +20,7 @@ func Summarize(data []float64) Summary {
 	n := float64(len(data))
 	m, v := meanAndVariance(data, n)
 
-	return Summary{
-		Mean:     m,
-		Variance: v,
-		N:        n,
-	}
+	return Summary{Mean: m, Variance: v, N: n}
 }
 
 // Difference represents the statistical difference between two samples.
@@ -47,7 +43,7 @@ func (d Difference) Significant() bool {
 func Compare(control, experiment Summary, confidence float64) Difference {
 	a, b := control, experiment
 	nu := a.N + b.N - 2
-	t := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}.Quantile(1 - ((1 - (confidence / 100)) / 2))
+	t := studentsTQuantile(nu, confidence)
 	s := math.Sqrt(((a.N-1)*a.Variance + (b.N-1)*b.Variance) / nu)
 	d := math.Abs(a.Mean - b.Mean)
 	e := t * s * math.Sqrt(1.0/a.N+1.0/b.N)
@@ -61,15 +57,20 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	}
 }
 
-func meanAndVariance(data []float64, n float64) (float64, float64) {
-	var m, m2 float64
+func studentsTQuantile(nu float64, confidence float64) float64 {
+	return distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}.
+		Quantile(1 - ((1 - (confidence / 100)) / 2))
+}
 
+func meanAndVariance(data []float64, n float64) (m float64, v float64) {
 	// Welford algorithm for corrected variance
 	for i, x := range data {
 		delta := x - m
 		m += delta / float64(i+1)
-		m2 += delta * (x - m)
+		v += delta * (x - m)
 	}
 
-	return m, m2 / (n - 1) // Bessel's correction
+	v /= n - 1 // Bessel's correction
+
+	return
 }
