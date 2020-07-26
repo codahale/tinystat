@@ -82,13 +82,14 @@ func main() {
 		return
 	}
 
-	if len(flag.Args()) < 1 {
+	args := flag.Args()
+	if len(args) < 1 {
 		flag.Usage()
 		os.Exit(-1)
 	}
 
-	controlFilename := flag.Arg(0)
-	experimentFilenames := flag.Args()[1:]
+	controlFilename := args[0]
+	experimentFilenames := args[1:]
 
 	// read the data
 	controlData, experimentData, err := readData(controlFilename, experimentFilenames)
