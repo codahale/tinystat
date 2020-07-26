@@ -47,11 +47,7 @@ func (d Difference) Significant() bool {
 func Compare(control, experiment Summary, confidence float64) Difference {
 	a, b := control, experiment
 	nu := a.N + b.N - 2
-	t := distuv.StudentsT{
-		Mu:    0, // Standard parameters for Student's T.
-		Sigma: 1,
-		Nu:    nu,
-	}.Quantile(1 - ((1 - (confidence / 100)) / 2))
+	t := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}.Quantile(1 - ((1 - (confidence / 100)) / 2))
 	s := math.Sqrt(((a.N-1)*a.Variance + (b.N-1)*b.Variance) / nu)
 	d := math.Abs(a.Mean - b.Mean)
 	e := t * s * math.Sqrt(1.0/a.N+1.0/b.N)
