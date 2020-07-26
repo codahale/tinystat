@@ -65,6 +65,8 @@ var (
 	noChart    = flag.Bool("no_chart", false, "don't display the box chart")
 	width      = flag.Int("width", 74, "width of box chart, in chars")
 	height     = flag.Int("height", 20, "height of box chart, in chars")
+	v          = flag.Bool("version", false, "display the version number")
+	version    = "dev" // injected by goreleaser
 )
 
 func main() {
@@ -74,6 +76,11 @@ func main() {
 		flag.PrintDefaults()
 	}
 	flag.Parse()
+
+	if *v {
+		fmt.Println(version)
+		return
+	}
 
 	if len(flag.Args()) < 1 {
 		flag.Usage()
@@ -97,37 +104,43 @@ func main() {
 
 	// compare the data
 	if len(experimentFilenames) > 0 {
-		control := tinystat.Summarize(controlData)
-		table := new(tabwriter.Writer)
-		table.Init(os.Stdout, 2, 0, 2, ' ', 0)
-		_, _ = fmt.Fprintln(table, "Experiment\tResults\t")
-
-		for _, filename := range experimentFilenames {
-			experimental := tinystat.Summarize(experimentData[filename])
-			d := tinystat.Compare(control, experimental, *confidence)
-
-			if d.Significant() {
-				_, _ = fmt.Fprintf(table,
-					"%s\tDifference at %v%% confidence!\t\n",
-					filename, *confidence)
-				_, _ = fmt.Fprintf(table,
-					"\t  %v +/- %v\t\n",
-					d.Delta, d.Error)
-				_, _ = fmt.Fprintf(table,
-					"\t  %v%% +/- %v%%\t\n",
-					d.RelDelta*100, d.RelError*100)
-				_, _ = fmt.Fprintf(table,
-					"\t  (Student's t, pooled s = %v)\t\n",
-					d.StdDev)
-			} else {
-				_, _ = fmt.Fprintf(table,
-					"%s\tNo difference proven at %v%% confidence.\t\n",
-					filename, *confidence)
-			}
-		}
-
-		_ = table.Flush()
+		printComparison(controlData, experimentFilenames, experimentData)
 	}
+}
+
+func printComparison(
+	controlData []float64, experimentFilenames []string, experimentData map[string][]float64,
+) {
+	control := tinystat.Summarize(controlData)
+	table := new(tabwriter.Writer)
+	table.Init(os.Stdout, 2, 0, 2, ' ', 0)
+	_, _ = fmt.Fprintln(table, "Experiment\tResults\t")
+
+	for _, filename := range experimentFilenames {
+		experimental := tinystat.Summarize(experimentData[filename])
+		d := tinystat.Compare(control, experimental, *confidence)
+
+		if d.Significant() {
+			_, _ = fmt.Fprintf(table,
+				"%s\tDifference at %v%% confidence!\t\n",
+				filename, *confidence)
+			_, _ = fmt.Fprintf(table,
+				"\t  %v +/- %v\t\n",
+				d.Delta, d.Error)
+			_, _ = fmt.Fprintf(table,
+				"\t  %v%% +/- %v%%\t\n",
+				d.RelDelta*100, d.RelError*100)
+			_, _ = fmt.Fprintf(table,
+				"\t  (Student's t, pooled s = %v)\t\n",
+				d.StdDev)
+		} else {
+			_, _ = fmt.Fprintf(table,
+				"%s\tNo difference proven at %v%% confidence.\t\n",
+				filename, *confidence)
+		}
+	}
+
+	_ = table.Flush()
 }
 
 func readData(controlFilename string, experimentFilenames []string) ([]float64, map[string][]float64, error) {
