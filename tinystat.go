@@ -59,7 +59,7 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 
 func studentsTQuantile(nu float64, confidence float64) float64 {
 	return distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}.
-		Quantile(1 - ((1 - (confidence / 100)) / 2))
+		Quantile(1 - ((1 - (confidence / 100)) / 2)) // two-tailed test
 }
 
 func meanAndVariance(data []float64, n float64) (m float64, v float64) {
