@@ -112,7 +112,7 @@ func printComparison(
 	controlData []float64, experimentFilenames []string, experimentData map[string][]float64,
 ) {
 	control := tinystat.Summarize(controlData)
-	table := new(tabwriter.Writer)
+	table := &tabwriter.Writer{}
 	table.Init(os.Stdout, 2, 0, 2, ' ', 0)
 	_, _ = fmt.Fprintln(table, "Experiment\tResults\t")
 
@@ -121,22 +121,12 @@ func printComparison(
 		d := tinystat.Compare(control, experimental, *confidence)
 
 		if d.Significant() {
-			_, _ = fmt.Fprintf(table,
-				"%s\tDifference at %v%% confidence!\t\n",
-				filename, *confidence)
-			_, _ = fmt.Fprintf(table,
-				"\t  %v +/- %v\t\n",
-				d.Delta, d.Error)
-			_, _ = fmt.Fprintf(table,
-				"\t  %v%% +/- %v%%\t\n",
-				d.RelDelta*100, d.RelError*100)
-			_, _ = fmt.Fprintf(table,
-				"\t  (Student's t, pooled s = %v)\t\n",
-				d.StdDev)
+			_, _ = fmt.Fprintf(table, "%s\tDifference at %v%% confidence!\t\n", filename, *confidence)
+			_, _ = fmt.Fprintf(table, "\t  %v +/- %v\t\n", d.Delta, d.Error)
+			_, _ = fmt.Fprintf(table, "\t  %v%% +/- %v%%\t\n", d.RelDelta*100, d.RelError*100)
+			_, _ = fmt.Fprintf(table, "\t  (Student's t, pooled s = %v)\t\n", d.StdDev)
 		} else {
-			_, _ = fmt.Fprintf(table,
-				"%s\tNo difference proven at %v%% confidence.\t\n",
-				filename, *confidence)
+			_, _ = fmt.Fprintf(table, "%s\tNo difference proven at %v%% confidence.\t\n", filename, *confidence)
 		}
 	}
 
