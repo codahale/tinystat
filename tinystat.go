@@ -1,5 +1,5 @@
-// Package tinystat provides the ability to compare data sets using Student's
-// t-test at various levels of confidence.
+// Package tinystat provides the ability to compare data sets using Student's t-test at various
+// levels of confidence.
 package tinystat
 
 import (
@@ -37,16 +37,28 @@ func (d Difference) Significant() bool {
 	return d.Delta > d.Error
 }
 
-// Compare returns the statistical difference between the two summaries using a
-// two-tailed Student's t-test. The confidence level must be in the range (0,
-// 100).
+// Compare returns the statistical difference between the two summaries using a two-tailed Student's
+// t-test. The confidence level must be in the range (0, 100).
 func Compare(control, experiment Summary, confidence float64) Difference {
 	a, b := control, experiment
+
+	// Calculate the combined degrees of freedom.
 	nu := a.N + b.N - 2
+
+	// Calculate the t-value using Student's T. gonum's implementation requires location and scale
+	// parameters (mu and sigma), in addition to the degrees of freedom for the distribution. The
+	// quantile is relaxed by half because this is a two-tailed test--that is, we're looking for
+	// whether experimental measurements are either higher or lower than the control measurements.
 	t := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}.
-		Quantile(1 - ((1 - (confidence / 100)) / 2)) // two-tailed test
+		Quantile(1 - ((1 - (confidence / 100)) / 2))
+
+	// Calculate the combined standard deviation.
 	s := math.Sqrt(((a.N-1)*a.Variance + (b.N-1)*b.Variance) / nu)
+
+	// Calculate the difference between the means of the two samples.
 	d := math.Abs(a.Mean - b.Mean)
+
+	// Calculate the standard error, given the t-value and standard deviation.
 	e := t * s * math.Sqrt(1.0/a.N+1.0/b.N)
 
 	return Difference{
