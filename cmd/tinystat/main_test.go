@@ -33,7 +33,8 @@ func TestControlOnly(t *testing.T) {
                                     iguana
 
 `
-	assert.Equal(t, "Output", want, mainTest(t, "../../examples/iguana"))
+	assert.Equal(t, "Output", want,
+		mainTest(t, "../../examples/iguana"))
 }
 
 func TestOneExperiment(t *testing.T) {
@@ -62,7 +63,8 @@ Experiment                Results
 ../../examples/chameleon  No difference proven at 95% confidence.
 `
 	assert.Equal(t, "Output", want,
-		mainTest(t, "../../examples/iguana", "../../examples/chameleon"))
+		mainTest(t, "../../examples/iguana",
+			"../../examples/chameleon"))
 }
 
 func TestTwoExperiments(t *testing.T) {

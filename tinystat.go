@@ -23,7 +23,7 @@ func Summarize(data []float64) Summary {
 	return Summary{Mean: m, Variance: v, N: float64(len(data))}
 }
 
-// Difference represents the statistical difference between two samples.
+// Difference represents the statistical difference between two Summary values.
 type Difference struct {
 	Delta    float64 // Delta is the difference between the samples' means.
 	Error    float64 // Error is the margin of error at the given confidence level.
