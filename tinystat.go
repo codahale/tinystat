@@ -52,7 +52,7 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	t := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}.
 		Quantile(1 - ((1 - (confidence / 100)) / 2))
 
-	// Calculate the combined standard deviation.
+	// Calculate the pooled estimate of standard deviation.
 	s := math.Sqrt(((a.N-1)*a.Variance + (b.N-1)*b.Variance) / nu)
 
 	// Calculate the difference between the means of the two samples.
