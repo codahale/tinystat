@@ -51,13 +51,11 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	// of degrees of freedom in the test.
 	dist := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}
 
-	// Calculate the t-value using the distribution. The quantile is relaxed by half because this is
-	// a two-tailed test--that is, we're looking for whether experimental measurements are either
-	// higher or lower than the control measurements.
-	t := dist.Quantile(1 - ((1 - (confidence / 100)) / 2))
+	// Calculate the t-value for the given confidence level.
+	t := dist.Quantile(1 - ((1 - (confidence / 100)) / tails))
 
 	// Calculate the p-value given the t-value.
-	p := 2 * dist.CDF(-t)
+	p := dist.CDF(-t) * tails
 
 	// Calculate the difference between the means of the two samples.
 	d := math.Abs(a.Mean - b.Mean)
@@ -76,3 +74,7 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 		P:                p,
 	}
 }
+
+// tails is the number of distribution tails used to determine significance. In this case, we always
+// use a two-tailed test because our null hypothesis is that the samples are not different.
+const tails = 2
