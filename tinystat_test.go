@@ -18,6 +18,8 @@ func TestSummarizeOdd(t *testing.T) {
 			Variance: 1,
 		},
 		s, epsilon)
+	assert.Equal(t, "StdDev", 1.0, s.StdDev(), epsilon)
+	assert.Equal(t, "StdErr", 0.5773502691896258, s.StdErr(), epsilon)
 }
 
 func TestSummarizeEven(t *testing.T) {
@@ -30,6 +32,8 @@ func TestSummarizeEven(t *testing.T) {
 			Variance: 1.6666666666666667,
 		},
 		s, epsilon)
+	assert.Equal(t, "StdDev", 1.2909944487358056, s.StdDev(), epsilon)
+	assert.Equal(t, "StdErr", 0.6454972243679028, s.StdErr(), epsilon)
 }
 
 func TestCompareSimilarData(t *testing.T) {

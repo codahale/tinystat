@@ -16,6 +16,16 @@ type Summary struct {
 	Variance float64 // Variance is the sample variance of the data set.
 }
 
+// StdDev returns the standard deviation of the sample.
+func (s *Summary) StdDev() float64 {
+	return math.Sqrt(s.Variance)
+}
+
+// StdErr returns the standard error of the sample.
+func (s *Summary) StdErr() float64 {
+	return stat.StdErr(s.StdDev(), s.N)
+}
+
 // Summarize analyzes the given data set and returns a Summary.
 func Summarize(data []float64) Summary {
 	m, v := stat.MeanVariance(data, nil)
