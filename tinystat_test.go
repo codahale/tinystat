@@ -56,9 +56,9 @@ func TestCompareDifferentData(t *testing.T) {
 	assert.Equal(t, "Compare",
 		tinystat.Difference{
 			Delta:            22.5,
-			CriticalValue:    10.624320828772332,
+			CriticalValue:    10.568344341563606,
 			RelDelta:         9.0,
-			RelCriticalValue: 4.2497283315089325,
+			RelCriticalValue: 4.227337736625442,
 		},
 		d, epsilon)
 	assert.Equal(t, "Significant", true, d.Significant())

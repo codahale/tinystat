@@ -42,8 +42,9 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	a, b := control, experiment
 
 	// Calculate the degrees of freedom.
-	nu := math.Floor(math.Pow((a.Variance/a.N)+(b.Variance/b.N), 2) /
-		((a.Variance*a.Variance)/(a.N*a.N*(a.N-1)) + (b.Variance*b.Variance)/(b.N*b.N*(b.N-1))))
+	nu := math.Pow(a.Variance/a.N+b.Variance/b.N, 2) /
+		(math.Pow(a.Variance, 2)/(math.Pow(a.N, 2)*(a.N-1)) +
+			math.Pow(b.Variance, 2)/(math.Pow(b.N, 2)*(b.N-1)))
 
 	// Calculate the t-value using Student's T. gonum's implementation requires location and scale
 	// parameters (mu and sigma), in addition to the degrees of freedom for the distribution. The
