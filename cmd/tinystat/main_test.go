@@ -94,6 +94,7 @@ Experiment                Results
 ../../examples/leopard    Difference at 95% confidence!
                             343.5 +/- 293.9689385361441
                             114.5% +/- 97.9896461787147%
+                            (Welch's t-test, p=0.050000000000000044)
 `
 	assert.Equal(t, "Output", want,
 		mainTest(t,

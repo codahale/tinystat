@@ -38,6 +38,7 @@ Experiment            Results
 ./examples/leopard    Difference at 95% confidence!            
                         343.5 +/- 296.4576611635198            
                         114.5% +/- 98.81922038783993%
+                        (Welch's t-test, p=0.050000000000000044)
 ```
 
 As you can see, despite the superficial differences between the iguana's scores and the chameleon's

@@ -29,6 +29,7 @@ type Difference struct {
 	CriticalValue    float64 // CriticalValue is the maximum allowed Delta at the given confidence level.
 	RelDelta         float64 // RelDelta is the ratio of Delta to the control mean.
 	RelCriticalValue float64 // RelCriticalValue is the ratio of CriticalValue to the control mean.
+	P                float64 // P is the p-value for the test.
 }
 
 // Significant returns true if the difference is statistically significant.
@@ -46,12 +47,17 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 		(math.Pow(a.Variance, 2)/(math.Pow(a.N, 2)*(a.N-1)) +
 			math.Pow(b.Variance, 2)/(math.Pow(b.N, 2)*(b.N-1)))
 
-	// Calculate the t-value using Student's T. gonum's implementation requires location and scale
-	// parameters (mu and sigma), in addition to the degrees of freedom for the distribution. The
-	// quantile is relaxed by half because this is a two-tailed test--that is, we're looking for
-	// whether experimental measurements are either higher or lower than the control measurements.
-	t := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}.
-		Quantile(1 - ((1 - (confidence / 100)) / 2))
+	// Create a Student's T distribution with location of 0, a scale of 1, and a shape of the number
+	// of degrees of freedom in the test.
+	dist := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}
+
+	// Calculate the t-value using the distribution. The quantile is relaxed by half because this is
+	// a two-tailed test--that is, we're looking for whether experimental measurements are either
+	// higher or lower than the control measurements.
+	t := dist.Quantile(1 - ((1 - (confidence / 100)) / 2))
+
+	// Calculate the p-value given the t-value.
+	p := 2 * dist.CDF(-t)
 
 	// Calculate the difference between the means of the two samples.
 	d := math.Abs(a.Mean - b.Mean)
@@ -67,5 +73,6 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 		CriticalValue:    cv,
 		RelDelta:         d / control.Mean,
 		RelCriticalValue: cv / control.Mean,
+		P:                p,
 	}
 }

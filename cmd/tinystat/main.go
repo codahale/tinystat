@@ -86,6 +86,7 @@ func printComparison(
 			_, _ = fmt.Fprintf(table, "%s\tDifference at %v%% confidence!\t\n", filename, *confidence)
 			_, _ = fmt.Fprintf(table, "\t  %v +/- %v\t\n", d.Delta, d.CriticalValue)
 			_, _ = fmt.Fprintf(table, "\t  %v%% +/- %v%%\t\n", d.RelDelta*100, d.RelCriticalValue*100)
+			_, _ = fmt.Fprintf(table, "\t  (Welch's t-test, p=%v)\t\n", d.P)
 		} else {
 			_, _ = fmt.Fprintf(table, "%s\tNo difference proven at %v%% confidence.\t\n", filename, *confidence)
 		}
