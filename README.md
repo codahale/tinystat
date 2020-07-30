@@ -2,7 +2,7 @@ tinystat
 ========
 
 A Go library and command for evaluating whether two or more sets of measurements are statistically
-different. It does this by performing a *Student's t-test* at a particular confidence level, making
+different. It does this by performing a *Welch's t-test* at a particular confidence level, making
 it suitable for small sets of measurements (e.g., multiple runs of a benchmark). It's inspired
 largely by FreeBSD's `ministat` (written by Poul-Henning Kamp).
 
@@ -13,32 +13,31 @@ times, and we're assuming that differences between each animal's attempts are me
 ```
 $ tinystat iguana chameleon leopard
 
- 1.5 k  +
-        |
-        |
-        |
-        |
-        |
-  1000  +                                             |
-        |                              |              |
-        |                        +-----------+  +-----------+
-        |              |         |           |  |           |
-        |              |         |           |  +-----*-----+
-        |              |         |     *     |  |           |
-   500  +              |         +-----------+  +-----------+
-        |        +-----------+   |           |        |
-        |        |     *     |   +-----------+
-        |        +-----------+         |
-        |        +-----------+         |
-     0  +--------------|-----------------------------------------------
-                    iguana         chameleon       leopard
+ 1.5 k  +                                                                 
+        |                                                                 
+        |                                                                 
+        |                                                                 
+        |                                                                 
+        |                                                                 
+  1000  +                                             |                   
+        |                              |              |                   
+        |                        +-----------+  +-----------+             
+        |              |         |           |  |           |             
+        |              |         |           |  +-----*-----+             
+        |              |         |     *     |  |           |             
+   500  +              |         +-----------+  +-----------+             
+        |        +-----------+   |           |        |                   
+        |        |     *     |   +-----------+                            
+        |        +-----------+         |                                  
+        |        +-----------+         |                                  
+     0  +--------------|-----------------------------------------------   
+                    iguana         chameleon       leopard                
 
-Experiment  Results
-chameleon   No difference proven at 95% confidence.
-leopard     Difference at 95% confidence!
-              343.5 +/- 292.63453863922877
-              114.5% +/- 97.54484621307626%
-              (Student's t, pooled s = 238.9799344943192)
+Experiment            Results                                  
+./examples/chameleon  No difference proven at 95% confidence.  
+./examples/leopard    Difference at 95% confidence!            
+                        343.5 +/- 296.4576611635198            
+                        114.5% +/- 98.81922038783993%
 ```
 
 As you can see, despite the superficial differences between the iguana's scores and the chameleon's

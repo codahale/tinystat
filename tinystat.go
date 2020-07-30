@@ -1,5 +1,5 @@
-// Package tinystat provides the ability to compare data sets using Student's t-test at various
-// levels of confidence.
+// Package tinystat provides the ability to compare data sets using Welch's t-test at various levels
+// of confidence.
 package tinystat
 
 import (
@@ -25,25 +25,25 @@ func Summarize(data []float64) Summary {
 
 // Difference represents the statistical difference between two Summary values.
 type Difference struct {
-	Delta    float64 // Delta is the difference between the samples' means.
-	Error    float64 // Error is the margin of error at the given confidence level.
-	RelDelta float64 // RelDelta is the ratio of Delta to the control mean.
-	RelError float64 // RelError is the ratio of Error to the control mean.
-	StdDev   float64 // StdDev is the pooled standard deviation of the two samples.
+	Delta            float64 // Delta is the absolute difference between the samples' means.
+	CriticalValue    float64 // CriticalValue is the maximum allowed Delta at the given confidence level.
+	RelDelta         float64 // RelDelta is the ratio of Delta to the control mean.
+	RelCriticalValue float64 // RelCriticalValue is the ratio of CriticalValue to the control mean.
 }
 
 // Significant returns true if the difference is statistically significant.
 func (d Difference) Significant() bool {
-	return d.Delta > d.Error
+	return d.Delta > d.CriticalValue
 }
 
-// Compare returns the statistical difference between the two summaries using a two-tailed Student's
+// Compare returns the statistical difference between the two summaries using a two-tailed Welch's
 // t-test. The confidence level must be in the range (0, 100).
 func Compare(control, experiment Summary, confidence float64) Difference {
 	a, b := control, experiment
 
-	// Calculate the combined degrees of freedom.
-	nu := a.N + b.N - 2
+	// Calculate the degrees of freedom.
+	nu := math.Floor(math.Pow((a.Variance/a.N)+(b.Variance/b.N), 2) /
+		((a.Variance*a.Variance)/(a.N*a.N*(a.N-1)) + (b.Variance*b.Variance)/(b.N*b.N*(b.N-1))))
 
 	// Calculate the t-value using Student's T. gonum's implementation requires location and scale
 	// parameters (mu and sigma), in addition to the degrees of freedom for the distribution. The
@@ -52,20 +52,19 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	t := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}.
 		Quantile(1 - ((1 - (confidence / 100)) / 2))
 
-	// Calculate the pooled estimate of standard deviation.
-	s := math.Sqrt(((a.N-1)*a.Variance + (b.N-1)*b.Variance) / nu)
-
 	// Calculate the difference between the means of the two samples.
 	d := math.Abs(a.Mean - b.Mean)
 
-	// Calculate the standard error, given the t-value and standard deviation.
-	e := t * s * math.Sqrt(1.0/a.N+1.0/b.N)
+	// Calculate the standard error.
+	s := math.Sqrt(a.Variance/a.N + b.Variance/b.N)
+
+	// Calculate the critical value.
+	cv := t * s
 
 	return Difference{
-		Delta:    d,
-		Error:    e,
-		RelDelta: d / control.Mean,
-		RelError: e / control.Mean,
-		StdDev:   s,
+		Delta:            d,
+		CriticalValue:    cv,
+		RelDelta:         d / control.Mean,
+		RelCriticalValue: cv / control.Mean,
 	}
 }

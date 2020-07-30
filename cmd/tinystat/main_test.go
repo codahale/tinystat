@@ -92,9 +92,8 @@ func TestTwoExperiments(t *testing.T) {
 Experiment                Results
 ../../examples/chameleon  No difference proven at 95% confidence.
 ../../examples/leopard    Difference at 95% confidence!
-                            343.5 +/- 292.6345386382977
-                            114.5% +/- 97.54484621276592%
-                            (Student's t, pooled s = 238.9799344943192)
+                            343.5 +/- 296.4576611635198
+                            114.5% +/- 98.81922038783993%
 `
 	assert.Equal(t, "Output", want,
 		mainTest(t,
