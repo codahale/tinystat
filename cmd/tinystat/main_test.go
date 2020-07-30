@@ -60,7 +60,7 @@ func TestOneExperiment(t *testing.T) {
                          iguana              chameleon
 
 Experiment                Results
-../../examples/chameleon  No difference proven at 95% confidence.
+../../examples/chameleon  No difference proven at 95% confidence, p = 0.0500
 `
 	assert.Equal(t, "Output", want,
 		mainTest(t, "../../examples/iguana",
@@ -90,11 +90,10 @@ func TestTwoExperiments(t *testing.T) {
                     iguana         chameleon       leopard
 
 Experiment                Results
-../../examples/chameleon  No difference proven at 95% confidence.
-../../examples/leopard    Difference at 95% confidence!
-                            343.5 +/- 293.9689385361441
-                            114.5% +/- 97.9896461787147%
-                            (Welch's t-test, p=0.050000000000000044)
+../../examples/chameleon  No difference proven at 95% confidence, p = 0.0500
+../../examples/leopard    Difference at 95% confidence, p = 0.0500
+                            643.5000   >   300.0000 ± 293.9689
+                            114.5000%  >    97.9896%
 `
 	assert.Equal(t, "Output", want,
 		mainTest(t,

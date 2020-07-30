@@ -13,32 +13,31 @@ times, and we're assuming that differences between each animal's attempts are me
 ```
 $ tinystat iguana chameleon leopard
 
- 1.5 k  +                                                                 
-        |                                                                 
-        |                                                                 
-        |                                                                 
-        |                                                                 
-        |                                                                 
-  1000  +                                             |                   
-        |                              |              |                   
-        |                        +-----------+  +-----------+             
-        |              |         |           |  |           |             
-        |              |         |           |  +-----*-----+             
-        |              |         |     *     |  |           |             
-   500  +              |         +-----------+  +-----------+             
-        |        +-----------+   |           |        |                   
-        |        |     *     |   +-----------+                            
-        |        +-----------+         |                                  
-        |        +-----------+         |                                  
-     0  +--------------|-----------------------------------------------   
-                    iguana         chameleon       leopard                
+ 1.5 k  +
+        |
+        |
+        |
+        |
+        |
+  1000  +                                             |
+        |                              |              |
+        |                        +-----------+  +-----------+
+        |              |         |           |  |           |
+        |              |         |           |  +-----*-----+
+        |              |         |     *     |  |           |
+   500  +              |         +-----------+  +-----------+
+        |        +-----------+   |           |        |
+        |        |     *     |   +-----------+
+        |        +-----------+         |
+        |        +-----------+         |
+     0  +--------------|-----------------------------------------------
+                    iguana         chameleon       leopard
 
-Experiment            Results                                  
-./examples/chameleon  No difference proven at 95% confidence.  
-./examples/leopard    Difference at 95% confidence!            
-                        343.5 +/- 296.4576611635198            
-                        114.5% +/- 98.81922038783993%
-                        (Welch's t-test, p=0.050000000000000044)
+Experiment                Results
+../../examples/chameleon  No difference proven at 95% confidence, p = 0.0500
+../../examples/leopard    Difference at 95% confidence, p = 0.0500
+                            643.5000   >   300.0000 ± 293.9689
+                            114.5000%  >    97.9896%
 ```
 
 As you can see, despite the superficial differences between the iguana's scores and the chameleon's

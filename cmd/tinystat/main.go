@@ -83,12 +83,21 @@ func printComparison(
 		d := tinystat.Compare(control, experimental, *confidence)
 
 		if d.Significant() {
-			_, _ = fmt.Fprintf(table, "%s\tDifference at %v%% confidence!\t\n", filename, *confidence)
-			_, _ = fmt.Fprintf(table, "\t  %v +/- %v\t\n", d.Delta, d.CriticalValue)
-			_, _ = fmt.Fprintf(table, "\t  %v%% +/- %v%%\t\n", d.RelDelta*100, d.RelCriticalValue*100)
-			_, _ = fmt.Fprintf(table, "\t  (Welch's t-test, p=%v)\t\n", d.P)
+			_, _ = fmt.Fprintf(table, "%s\tDifference at %v%% confidence, p = %.4f\t\n",
+				filename, *confidence, d.P)
+
+			operator := ">"
+			if experimental.Mean < control.Mean {
+				operator = "<"
+			}
+
+			_, _ = fmt.Fprintf(table, "\t%10.4f   %s %10.4f ± %.4f\t\n",
+				experimental.Mean, operator, control.Mean, d.CriticalValue)
+			_, _ = fmt.Fprintf(table, "\t%10.4f%%  > %10.4f%%\t\n",
+				d.RelDelta*100, d.RelCriticalValue*100)
 		} else {
-			_, _ = fmt.Fprintf(table, "%s\tNo difference proven at %v%% confidence.\t\n", filename, *confidence)
+			_, _ = fmt.Fprintf(table, "%s\tNo difference proven at %v%% confidence, p = %.4f\t\n",
+				filename, *confidence, d.P)
 		}
 	}
 
