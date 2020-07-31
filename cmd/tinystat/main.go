@@ -78,26 +78,26 @@ func printComparison(
 	_, _ = fmt.Fprintf(t, "File\tN\tMean\tStddev\t\n")
 
 	control := tinystat.Summarize(controlData)
-	_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t%s\n",
-		controlFilename, control.N, control.Mean, control.StdDev(), "(control)")
+	_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t%s\n", path.Base(controlFilename),
+		control.N, control.Mean, control.StdDev(), "(control)")
 
 	for _, filename := range experimentFilenames {
 		experiment := tinystat.Summarize(experimentData[filename])
 		d := tinystat.Compare(control, experiment, *confidence)
 
+		results := fmt.Sprintf("(no difference, p = %.3f)", d.P)
 		if d.Significant() {
 			operator := ">"
 			if experiment.Mean < control.Mean {
 				operator = "<"
 			}
 
-			_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t(%.2f %s %.2f ± %.2f, p = %.3f)\n",
-				filename, experiment.N, experiment.Mean, experiment.StdDev(),
+			results = fmt.Sprintf("(%.2f %s %.2f ± %.2f, p = %.3f)",
 				experiment.Mean, operator, control.Mean, d.CriticalValue, d.P)
-		} else {
-			_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t(no difference, p = %.3f)\n",
-				filename, experiment.N, experiment.Mean, experiment.StdDev(), d.P)
 		}
+
+		_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t%s\n",
+			path.Base(filename), experiment.N, experiment.Mean, experiment.StdDev(), results)
 	}
 
 	_ = t.Flush()
