@@ -66,42 +66,41 @@ func main() {
 
 	// compare the data
 	if len(experimentFilenames) > 0 {
-		printComparison(controlData, experimentFilenames, experimentData)
+		printComparison(controlFilename, controlData, experimentFilenames, experimentData)
 	}
 }
 
 func printComparison(
-	controlData []float64, experimentFilenames []string, experimentData map[string][]float64,
+	controlFilename string, controlData []float64,
+	experimentFilenames []string, experimentData map[string][]float64,
 ) {
+	t := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
+	_, _ = fmt.Fprintf(t, "File\tN\tMean\tStddev\t\n")
+
 	control := tinystat.Summarize(controlData)
-	table := &tabwriter.Writer{}
-	table.Init(os.Stdout, 2, 0, 2, ' ', 0)
-	_, _ = fmt.Fprintln(table, "Experiment\tResults\t")
+	_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t%s\n",
+		controlFilename, control.N, control.Mean, control.StdDev(), "(control)")
 
 	for _, filename := range experimentFilenames {
-		experimental := tinystat.Summarize(experimentData[filename])
-		d := tinystat.Compare(control, experimental, *confidence)
+		experiment := tinystat.Summarize(experimentData[filename])
+		d := tinystat.Compare(control, experiment, *confidence)
 
 		if d.Significant() {
-			_, _ = fmt.Fprintf(table, "%s\tDifference at %v%% confidence, p = %.4f\t\n",
-				filename, *confidence, d.P)
-
 			operator := ">"
-			if experimental.Mean < control.Mean {
+			if experiment.Mean < control.Mean {
 				operator = "<"
 			}
 
-			_, _ = fmt.Fprintf(table, "\t%10.4f   %s %10.4f ± %.4f\t\n",
-				experimental.Mean, operator, control.Mean, d.CriticalValue)
-			_, _ = fmt.Fprintf(table, "\t%10.4f%%  > %10.4f%%\t\n",
-				d.RelDelta*100, d.RelCriticalValue*100)
+			_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t(%.2f %s %.2f ± %.2f, p = %.3f)\n",
+				filename, experiment.N, experiment.Mean, experiment.StdDev(),
+				experiment.Mean, operator, control.Mean, d.CriticalValue, d.P)
 		} else {
-			_, _ = fmt.Fprintf(table, "%s\tNo difference proven at %v%% confidence, p = %.4f\t\n",
-				filename, *confidence, d.P)
+			_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t(no difference, p = %.3f)\n",
+				filename, experiment.N, experiment.Mean, experiment.StdDev(), d.P)
 		}
 	}
 
-	_ = table.Flush()
+	_ = t.Flush()
 }
 
 func readData(controlFilename string, experimentFilenames []string) ([]float64, map[string][]float64, error) {

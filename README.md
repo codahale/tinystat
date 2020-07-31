@@ -33,11 +33,10 @@ $ tinystat iguana chameleon leopard
      0  +--------------|-----------------------------------------------
                     iguana         chameleon       leopard
 
-Experiment                Results
-../../examples/chameleon  No difference proven at 95% confidence, p = 0.0500
-../../examples/leopard    Difference at 95% confidence, p = 0.0500
-                            643.5000   >   300.0000 ± 293.9689
-                            114.5000%  >    97.9896%
+File       N  Mean    Stddev
+iguana     7  300.00  238.05  (control)
+chameleon  5  540.00  299.08  (no difference, p = 0.050)
+leopard    6  643.50  240.09  (643.50 > 300.00 ± 293.97, p = 0.050)
 ```
 
 As you can see, despite the superficial differences between the iguana's scores and the chameleon's
