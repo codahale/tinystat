@@ -85,7 +85,8 @@ func printComparison(
 		experiment := tinystat.Summarize(experimentData[filename])
 		d := tinystat.Compare(control, experiment, *confidence)
 
-		results := fmt.Sprintf("(no difference, p = %.3f)", d.P)
+		var results string
+
 		if d.Significant() {
 			operator := ">"
 			if experiment.Mean < control.Mean {
@@ -94,6 +95,8 @@ func printComparison(
 
 			results = fmt.Sprintf("(%.2f %s %.2f ± %.2f, p = %.3f)",
 				experiment.Mean, operator, control.Mean, d.CriticalValue, d.P)
+		} else {
+			results = fmt.Sprintf("(no difference, p = %.3f)", d.P)
 		}
 
 		_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t%s\n",
