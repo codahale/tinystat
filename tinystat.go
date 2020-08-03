@@ -39,7 +39,15 @@ type Difference struct {
 	CriticalValue    float64 // CriticalValue is the maximum allowed Delta at the given confidence level.
 	RelDelta         float64 // RelDelta is the ratio of Delta to the control mean.
 	RelCriticalValue float64 // RelCriticalValue is the ratio of CriticalValue to the control mean.
-	P                float64 // P is the p-value for the test.
+
+	// PValue is the p-value for the test. This is, effectively, the probability that accepting the
+	// results of this test will be a Type 1 error, in which the null hypothesis (i.e. there is no
+	// difference between the means of the two samples) will be rejected when it is in fact true.
+	PValue float64
+
+	// EffectSize is the difference in means between the two samples, normalized for variance.
+	// Technically, this is Cohen's d.
+	EffectSize float64
 }
 
 // Significant returns true if the difference is statistically significant.
@@ -76,12 +84,17 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	// Calculate the critical value.
 	cv := t * s
 
+	// Calculate Cohen's d for the effect size, using the mean variance instead of the pooled
+	// variance.
+	cd := d / math.Sqrt((a.Variance+b.Variance)/2)
+
 	return Difference{
 		Delta:            d,
 		CriticalValue:    cv,
 		RelDelta:         d / control.Mean,
 		RelCriticalValue: cv / control.Mean,
-		P:                p,
+		PValue:           p,
+		EffectSize:       cd,
 	}
 }
 

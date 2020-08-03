@@ -47,7 +47,8 @@ func TestCompareSimilarData(t *testing.T) {
 			CriticalValue:    1.31431116679138120,
 			RelDelta:         0,
 			RelCriticalValue: 0.5257244667165525,
-			P:                0.20000000000000004,
+			PValue:           0.20000000000000004,
+			EffectSize:       0,
 		},
 		d, epsilon)
 	assert.Equal(t, "Significant", false, d.Significant())
@@ -64,7 +65,8 @@ func TestCompareDifferentData(t *testing.T) {
 			CriticalValue:    10.568344341563606,
 			RelDelta:         9.0,
 			RelCriticalValue: 4.227337736625442,
-			P:                0.19999999999999996,
+			PValue:           0.19999999999999996,
+			EffectSize:       2.452519415855564,
 		},
 		d, epsilon)
 	assert.Equal(t, "Significant", true, d.Significant())

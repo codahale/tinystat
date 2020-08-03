@@ -94,9 +94,9 @@ func printComparison(
 			}
 
 			results = fmt.Sprintf("(%.2f %s %.2f ± %.2f, p = %.3f)",
-				experiment.Mean, operator, control.Mean, d.CriticalValue, d.P)
+				experiment.Mean, operator, control.Mean, d.CriticalValue, d.PValue)
 		} else {
-			results = fmt.Sprintf("(no difference, p = %.3f)", d.P)
+			results = fmt.Sprintf("(no difference, p = %.3f)", d.PValue)
 		}
 
 		_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t%s\n",
