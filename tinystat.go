@@ -102,7 +102,7 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	// Calculate the critical value.
 	cv := tHyp * s
 
-	// Calculate the standard deviating using mean variance.
+	// Calculate the standard deviation using mean variance.
 	sd := math.Sqrt((a.Variance + b.Variance) / 2)
 
 	// Calculate Cohen's d for the effect size.
