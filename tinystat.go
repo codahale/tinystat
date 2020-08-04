@@ -42,7 +42,7 @@ type Difference struct {
 	// Technically, this is Cohen's d.
 	EffectSize float64
 
-	// CriticalValue is the maximum allowed Effect at the given confidence level.
+	// CriticalValue is the minimum allowed Effect at the given confidence level.
 	CriticalValue float64
 
 	// PValue is the p-value for the test. This is, effectively, the probability that accepting the
