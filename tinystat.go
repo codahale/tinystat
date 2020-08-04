@@ -101,7 +101,7 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	// Calculate the standard deviating using mean variance.
 	sd := math.Sqrt((a.Variance + b.Variance) / 2)
 
-	// Calculate Cohen's d for the effect size
+	// Calculate Cohen's d for the effect size.
 	cd := d / sd
 
 	// Calculate the statistical power.
