@@ -40,6 +40,7 @@ func main() {
 
 	if *v {
 		fmt.Println(version)
+
 		return
 	}
 

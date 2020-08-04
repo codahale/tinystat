@@ -11,6 +11,7 @@ linters:
     - exhaustive
     - exportloopref
     - funlen
+    - gci
     - gochecknoglobals
     - gochecknoinits
     - gocognit
@@ -36,6 +37,7 @@ linters:
     - misspell
     - nakedret
     - nestif
+    - nlreturn
     - noctx
     - nolintlint
     - prealloc
