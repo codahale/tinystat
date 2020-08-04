@@ -75,13 +75,16 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 
 	// Create a Student's T distribution with location of 0, a scale of 1, and a shape of the number
 	// of degrees of freedom in the test.
-	dist := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}
+	studentsT := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}
+
+	// Create a standard normal distribution.
+	stdNormal := distuv.UnitNormal
 
 	// Calculate the significance level.
 	alpha := 1 - (confidence / 100)
 
 	// Calculate the two-tailed t-value for the given confidence level.
-	tHyp := dist.Quantile(1 - (alpha / tails))
+	tHyp := studentsT.Quantile(1 - (alpha / tails))
 
 	// Calculate the standard error.
 	s := math.Sqrt(a.Variance/a.N + b.Variance/b.N)
@@ -90,7 +93,7 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	d := math.Abs(a.Mean - b.Mean)
 
 	// Calculate the p-value given the test statistic.
-	p := dist.CDF(-(d / s)) * tails
+	p := studentsT.CDF(-(d / s)) * tails
 
 	// Calculate the critical value.
 	cv := tHyp * s
@@ -103,8 +106,8 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 
 	// Calculate the statistical power.
 	z := d / (sd * math.Sqrt(1/a.N+1/b.N))
-	za := distuv.UnitNormal.Quantile(1 - alpha/tails)
-	beta := distuv.UnitNormal.CDF(z-za) - distuv.UnitNormal.CDF(-z-za)
+	za := stdNormal.Quantile(1 - alpha/tails)
+	beta := stdNormal.CDF(z-za) - stdNormal.CDF(-z-za)
 
 	return Difference{
 		Effect:        d,
