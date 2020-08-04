@@ -66,6 +66,10 @@ func (d Difference) Significant() bool {
 // Compare returns the statistical difference between the two summaries using a two-tailed Welch's
 // t-test. The confidence level must be in the range (0, 100).
 func Compare(control, experiment Summary, confidence float64) Difference {
+	if 0 >= confidence || 1 >= confidence {
+		panic("confidence must be between 0 and 1")
+	}
+
 	a, b := control, experiment
 
 	// Calculate the significance level.
