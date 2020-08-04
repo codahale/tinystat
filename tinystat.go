@@ -45,16 +45,16 @@ type Difference struct {
 	// CriticalValue is the minimum allowed Effect at the given confidence level.
 	CriticalValue float64
 
-	// PValue is the p-value for the test. This is, effectively, the probability that accepting the
-	// results of this test will be a Type 1 error, in which the null hypothesis (i.e. there is no
-	// difference between the means of the two samples) will be rejected when it is in fact true.
+	// PValue is the p-value for the test: the probability that accepting the results of this test
+	// will be a Type 1 error, in which the null hypothesis (i.e. there is no difference between the
+	// means of the two samples) will be rejected when it is in fact true.
 	PValue float64
 
 	// Alpha is the significance level of the test. It is the maximum allowed value of the p-value.
 	Alpha float64
 
-	// Beta is the probability of a Type 2 error. That is, the probability that the null hypothesis
-	// will be retained despite it not being true.
+	// Beta is the probability of a Type 2 error: the probability that the null hypothesis will be
+	// retained despite it not being true.
 	Beta float64
 }
 
