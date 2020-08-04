@@ -43,12 +43,12 @@ func TestCompareSimilarData(t *testing.T) {
 
 	assert.Equal(t, "Compare",
 		tinystat.Difference{
-			Delta:            0,
-			CriticalValue:    1.31431116679138120,
-			RelDelta:         0,
-			RelCriticalValue: 0.5257244667165525,
-			PValue:           0.20000000000000004,
-			EffectSize:       0,
+			Effect:        0,
+			EffectSize:    0,
+			CriticalValue: 1.31431116679138120,
+			PValue:        1,
+			Alpha:         0.19999999999999996,
+			Beta:          0,
 		},
 		d, epsilon)
 	assert.Equal(t, "Significant", false, d.Significant())
@@ -61,12 +61,12 @@ func TestCompareDifferentData(t *testing.T) {
 
 	assert.Equal(t, "Compare",
 		tinystat.Difference{
-			Delta:            22.5,
-			CriticalValue:    10.568344341563606,
-			RelDelta:         9.0,
-			RelCriticalValue: 4.227337736625442,
-			PValue:           0.19999999999999996,
-			EffectSize:       2.452519415855564,
+			Effect:        22.5,
+			EffectSize:    2.452519415855564,
+			CriticalValue: 10.568344341563606,
+			PValue:        0.03916791618893338,
+			Alpha:         0.19999999999999996,
+			Beta:          0.9856216842773273,
 		},
 		d, epsilon)
 	assert.Equal(t, "Significant", true, d.Significant())

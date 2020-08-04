@@ -35,8 +35,8 @@ $ tinystat iguana chameleon leopard
 
 File       N  Mean    Stddev
 iguana     7  300.00  238.05  (control)
-chameleon  5  540.00  299.08  (no difference, p = 0.050)
-leopard    6  643.50  240.09  (643.50 > 300.00 ± 293.97, p = 0.050)
+chameleon  5  540.00  299.08  (no difference, p = 0.178)
+leopard    6  643.50  240.09  (643.50 > 300.00 ± 293.97, p = 0.026)
 ```
 
 As you can see, despite the superficial differences between the iguana's scores and the chameleon's

@@ -61,7 +61,7 @@ func TestOneExperiment(t *testing.T) {
 
 File       N  Mean    Stddev
 iguana     7  300.00  238.05  (control)
-chameleon  5  540.00  299.08  (no difference, p = 0.050)
+chameleon  5  540.00  299.08  (no difference, p = 0.178)
 `
 	assert.Equal(t, "Output", want,
 		mainTest(t,
@@ -94,8 +94,8 @@ func TestTwoExperiments(t *testing.T) {
 
 File       N  Mean    Stddev
 iguana     7  300.00  238.05  (control)
-chameleon  5  540.00  299.08  (no difference, p = 0.050)
-leopard    6  643.50  240.09  (643.50 > 300.00 ± 293.97, p = 0.050)
+chameleon  5  540.00  299.08  (no difference, p = 0.178)
+leopard    6  643.50  240.09  (643.50 > 300.00 ± 293.97, p = 0.026)
 `
 	assert.Equal(t, "Output", want,
 		mainTest(t,

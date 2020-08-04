@@ -35,24 +35,32 @@ func Summarize(data []float64) Summary {
 
 // Difference represents the statistical difference between two Summary values.
 type Difference struct {
-	Delta            float64 // Delta is the absolute difference between the samples' means.
-	CriticalValue    float64 // CriticalValue is the maximum allowed Delta at the given confidence level.
-	RelDelta         float64 // RelDelta is the ratio of Delta to the control mean.
-	RelCriticalValue float64 // RelCriticalValue is the ratio of CriticalValue to the control mean.
+	// Effect is the absolute difference between the samples' means.
+	Effect float64
+
+	// EffectSize is the difference in means between the two samples, normalized for variance.
+	// Technically, this is Cohen's d.
+	EffectSize float64
+
+	// CriticalValue is the maximum allowed Effect at the given confidence level.
+	CriticalValue float64
 
 	// PValue is the p-value for the test. This is, effectively, the probability that accepting the
 	// results of this test will be a Type 1 error, in which the null hypothesis (i.e. there is no
 	// difference between the means of the two samples) will be rejected when it is in fact true.
 	PValue float64
 
-	// EffectSize is the difference in means between the two samples, normalized for variance.
-	// Technically, this is Cohen's d.
-	EffectSize float64
+	// Alpha is the significance level of the test. It is the maximum allowed value of the p-value.
+	Alpha float64
+
+	// Beta is the probability of a Type 2 error. That is, the probability that the null hypothesis
+	// will be retained despite it not being true.
+	Beta float64
 }
 
 // Significant returns true if the difference is statistically significant.
 func (d Difference) Significant() bool {
-	return d.Delta > d.CriticalValue
+	return d.Effect > d.CriticalValue
 }
 
 // Compare returns the statistical difference between the two summaries using a two-tailed Welch's
@@ -69,32 +77,42 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	// of degrees of freedom in the test.
 	dist := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}
 
-	// Calculate the t-value for the given confidence level.
-	t := dist.Quantile(1 - ((1 - (confidence / 100)) / tails))
+	// Calculate the significance level.
+	alpha := 1 - (confidence / 100)
 
-	// Calculate the p-value given the t-value.
-	p := dist.CDF(-t) * tails
-
-	// Calculate the difference between the means of the two samples.
-	d := math.Abs(a.Mean - b.Mean)
+	// Calculate the two-tailed t-value for the given confidence level.
+	tHyp := dist.Quantile(1 - (alpha / tails))
 
 	// Calculate the standard error.
 	s := math.Sqrt(a.Variance/a.N + b.Variance/b.N)
 
-	// Calculate the critical value.
-	cv := t * s
+	// Calculate the difference between the means of the two samples.
+	d := math.Abs(a.Mean - b.Mean)
 
-	// Calculate Cohen's d for the effect size, using the mean variance instead of the pooled
-	// variance.
-	cd := d / math.Sqrt((a.Variance+b.Variance)/2)
+	// Calculate the p-value given the test statistic.
+	p := dist.CDF(-(d / s)) * tails
+
+	// Calculate the critical value.
+	cv := tHyp * s
+
+	// Calculate the standard deviating using mean variance.
+	sd := math.Sqrt((a.Variance + b.Variance) / 2)
+
+	// Calculate Cohen's d for the effect size
+	cd := d / sd
+
+	// Calculate the statistical power.
+	z := d / (sd * math.Sqrt(1/a.N+1/b.N))
+	za := distuv.UnitNormal.Quantile(1 - alpha/tails)
+	beta := distuv.UnitNormal.CDF(z-za) - distuv.UnitNormal.CDF(-z-za)
 
 	return Difference{
-		Delta:            d,
-		CriticalValue:    cv,
-		RelDelta:         d / control.Mean,
-		RelCriticalValue: cv / control.Mean,
-		PValue:           p,
-		EffectSize:       cd,
+		Effect:        d,
+		CriticalValue: cv,
+		EffectSize:    cd,
+		PValue:        p,
+		Alpha:         alpha,
+		Beta:          beta,
 	}
 }
 
