@@ -68,6 +68,9 @@ func (d Difference) Significant() bool {
 func Compare(control, experiment Summary, confidence float64) Difference {
 	a, b := control, experiment
 
+	// Calculate the significance level.
+	alpha := 1 - (confidence / 100)
+
 	// Calculate the degrees of freedom.
 	nu := math.Pow(a.Variance/a.N+b.Variance/b.N, 2) /
 		(math.Pow(a.Variance, 2)/(math.Pow(a.N, 2)*(a.N-1)) +
@@ -77,23 +80,20 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 	// of degrees of freedom in the test.
 	studentsT := distuv.StudentsT{Mu: 0, Sigma: 1, Nu: nu}
 
-	// Create a standard normal distribution.
-	stdNormal := distuv.UnitNormal
-
-	// Calculate the significance level.
-	alpha := 1 - (confidence / 100)
-
-	// Calculate the two-tailed t-value for the given confidence level.
+	// Calculate the hypothetical two-tailed t-value for the given significance level.
 	tHyp := studentsT.Quantile(1 - (alpha / tails))
+
+	// Calculate the absolute difference between the means of the two samples.
+	d := math.Abs(a.Mean - b.Mean)
 
 	// Calculate the standard error.
 	s := math.Sqrt(a.Variance/a.N + b.Variance/b.N)
 
-	// Calculate the difference between the means of the two samples.
-	d := math.Abs(a.Mean - b.Mean)
+	// Calculate the experimental t-value.
+	tExp := d / s
 
-	// Calculate the p-value given the test statistic.
-	p := studentsT.CDF(-(d / s)) * tails
+	// Calculate the p-value given the experimental t-value.
+	p := studentsT.CDF(-tExp) * tails
 
 	// Calculate the critical value.
 	cv := tHyp * s
@@ -103,6 +103,9 @@ func Compare(control, experiment Summary, confidence float64) Difference {
 
 	// Calculate Cohen's d for the effect size.
 	cd := d / sd
+
+	// Create a standard normal distribution.
+	stdNormal := distuv.UnitNormal
 
 	// Calculate the statistical power.
 	z := d / (sd * math.Sqrt(1/a.N+1/b.N))
