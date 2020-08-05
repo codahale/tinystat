@@ -37,7 +37,6 @@ linters:
     - misspell
     - nakedret
     - nestif
-    - nlreturn
     - noctx
     - nolintlint
     - prealloc
@@ -55,6 +54,7 @@ linters:
     - wsl
 #    - goheader
 #    - gomnd
+#    - nlreturn
 #    - testpackage
 #    - typecheck
 
