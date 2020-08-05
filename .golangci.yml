@@ -65,6 +65,8 @@ linters-settings:
     min-complexity: 10
   gocyclo:
     min-complexity: 10
+  gofumpt:
+    extra-rules: true
   maligned:
     suggest-new: true
   nolintlint:
