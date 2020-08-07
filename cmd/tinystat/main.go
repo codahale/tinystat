@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/codahale/tinystat"
@@ -85,6 +86,7 @@ func printComparison(
 	for _, filename := range experimentFilenames {
 		experiment := tinystat.Summarize(experimentData[filename])
 		d := tinystat.Compare(control, experiment, *confidence)
+		p := strings.TrimLeft(fmt.Sprintf("%.3f", d.PValue), "0")
 
 		var results string
 
@@ -94,10 +96,10 @@ func printComparison(
 				operator = "<"
 			}
 
-			results = fmt.Sprintf("(%.2f %s %.2f ± %.2f, p = %.3f)",
-				experiment.Mean, operator, control.Mean, d.CriticalValue, d.PValue)
+			results = fmt.Sprintf("(%.2f %s %.2f ± %.2f, p = %s)",
+				experiment.Mean, operator, control.Mean, d.CriticalValue, p)
 		} else {
-			results = fmt.Sprintf("(no difference, p = %.3f)", d.PValue)
+			results = fmt.Sprintf("(no difference, p = %s)", p)
 		}
 
 		_, _ = fmt.Fprintf(t, "%s\t%.0f\t%.2f\t%0.2f\t%s\n",
