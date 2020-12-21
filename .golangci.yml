@@ -11,6 +11,7 @@ linters:
     - exhaustive
     - exportloopref
     - funlen
+    - errorlint
     - gci
     - gochecknoglobals
     - gochecknoinits
@@ -39,6 +40,7 @@ linters:
     - nestif
     - noctx
     - nolintlint
+    - paralleltest
     - prealloc
     - rowserrcheck
     - scopelint
@@ -46,17 +48,20 @@ linters:
     - staticcheck
     - structcheck
     - stylecheck
+    - tparallel
     - unconvert
     - unparam
     - unused
     - varcheck
     - whitespace
     - wsl
+#    - exhaustivestruct
 #    - goheader
 #    - gomnd
 #    - nlreturn
 #    - testpackage
 #    - typecheck
+#    - wrapcheck
 
 linters-settings:
   funlen:

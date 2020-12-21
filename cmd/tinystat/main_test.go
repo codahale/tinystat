@@ -10,6 +10,7 @@ import (
 	"github.com/codahale/tinystat/internal/assert"
 )
 
+//nolint:paralleltest // shared state
 func TestControlOnly(t *testing.T) {
 	want := `
    800  +
@@ -37,6 +38,7 @@ func TestControlOnly(t *testing.T) {
 		mainTest(t, "../../examples/iguana"))
 }
 
+//nolint:paralleltest // shared state
 func TestOneExperiment(t *testing.T) {
 	want := `
   1000  +
@@ -70,6 +72,7 @@ chameleon  5  540.00  299.08  (no difference, p = .178)
 		))
 }
 
+//nolint:paralleltest // shared state
 func TestTwoExperiments(t *testing.T) {
 	want := `
  1.5 k  +

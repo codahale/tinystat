@@ -9,6 +9,8 @@ import (
 )
 
 func TestSummarizeOdd(t *testing.T) {
+	t.Parallel()
+
 	s := tinystat.Summarize([]float64{1, 2, 3})
 
 	assert.Equal(t, "Summarize",
@@ -23,6 +25,8 @@ func TestSummarizeOdd(t *testing.T) {
 }
 
 func TestSummarizeEven(t *testing.T) {
+	t.Parallel()
+
 	s := tinystat.Summarize([]float64{1, 2, 3, 4})
 
 	assert.Equal(t, "Summarize",
@@ -37,6 +41,8 @@ func TestSummarizeEven(t *testing.T) {
 }
 
 func TestCompareSimilarData(t *testing.T) {
+	t.Parallel()
+
 	a := tinystat.Summarize([]float64{1, 2, 3, 4})
 	b := tinystat.Summarize([]float64{1, 2, 3, 4})
 	d := tinystat.Compare(a, b, 80)
@@ -55,6 +61,8 @@ func TestCompareSimilarData(t *testing.T) {
 }
 
 func TestCompareDifferentData(t *testing.T) {
+	t.Parallel()
+
 	a := tinystat.Summarize([]float64{1, 2, 3, 4})
 	b := tinystat.Summarize([]float64{10, 20, 30, 40})
 	d := tinystat.Compare(a, b, 80)
