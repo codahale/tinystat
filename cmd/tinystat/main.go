@@ -1,12 +1,10 @@
-// tinystat is used to compare two or more sets of measurements (e.g., runs of a
-// multiple runs of benchmarks of two possible implementations) and determine if
-// they are statistically different. It's inspired largely by FreeBSD's ministat
-// (written by Poul-Henning Kamp).
+// tinystat is used to compare two or more sets of measurements (e.g., runs of a multiple runs of
+// benchmarks of two possible implementations) and determine if they are statistically different.
+// It's inspired largely by FreeBSD's ministat (written by Poul-Henning Kamp).
 package main
 
 import (
 	"encoding/csv"
-	"flag"
 	"fmt"
 	"os"
 	"path"
@@ -14,67 +12,57 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/alecthomas/kong"
 	"github.com/codahale/tinystat"
 	"github.com/vdobler/chart"
 	"github.com/vdobler/chart/txtg"
 )
 
-//nolint:gochecknoglobals // main package
-var (
-	confidence = flag.Float64("confidence", 95, "confidence level for analysis (0,100)")
-	column     = flag.Int("column", 0, "the CSV column to analyze")
-	delimiter  = flag.String("delimiter", ",", "the CSV delimiter to use")
-	noChart    = flag.Bool("no_chart", false, "don't display the box chart")
-	width      = flag.Int("width", 74, "width of box chart, in chars")
-	height     = flag.Int("height", 20, "height of box chart, in chars")
-	v          = flag.Bool("version", false, "display the version number")
-	version    = "dev" // injected by goreleaser
-)
+var version = "dev"
 
 func main() {
-	flag.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr, "Usage: tinystat <control.csv> [<experiment.csv>...] [options] \n\n")
-
-		flag.PrintDefaults()
-	}
-	flag.Parse()
-
-	if *v {
-		fmt.Println(version)
-
-		return
-	}
-
-	args := flag.Args()
-	if len(args) < 1 {
-		flag.Usage()
-		os.Exit(-1)
+	//nolint:maligned // ordering of fields matters
+	var cli struct {
+		//nolint:lll // can't format struct field tags
+		Confidence      float64          `short:"C" default:"95" help:"Confidence level for statistical significance (0,100)."`
+		Column          int              `short:"c" default:"0" help:"The CSV column to analyze."`
+		Delimiter       string           `short:"d" default:"," help:"The CSV delimiter to use."`
+		NoChart         bool             `default:"false" help:"Don't display the box chart.'"`
+		Width           int              `default:"74" help:"The width of the box chart in chars."`
+		Height          int              `default:"20" help:"The height of the box chart in chars."`
+		Version         kong.VersionFlag `help:"Display the application version."`
+		ControlPath     string           `arg:"" type:"existingfile" help:"The CSV file containing measurements of the control group."`            //nolint:lll // can't format struct field tags
+		ExperimentPaths []string         `arg:"" optional:"" type:"existingfile" help:"CSV files containing measurements of experimental groups."` //nolint:lll // can't format struct field tags
 	}
 
-	controlFilename := args[0]
-	experimentFilenames := args[1:]
+	ctx := kong.Parse(&cli, kong.Vars{"version": version})
+	if ctx.Error != nil {
+		_, _ = fmt.Fprintln(os.Stderr, ctx.Error)
+		os.Exit(1)
+	}
 
 	// read the data
-	controlData, experimentData, err := readData(controlFilename, experimentFilenames)
+	controlData, experimentData, err := readData(cli.ControlPath, cli.ExperimentPaths, cli.Column, cli.Delimiter)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(-1)
 	}
 
 	// chart the data
-	if !*noChart {
-		printChart(experimentFilenames, controlFilename, controlData, experimentData)
+	if !cli.NoChart {
+		printChart(cli.ExperimentPaths, cli.ControlPath, controlData, experimentData, cli.Width, cli.Height)
 	}
 
 	// compare the data
-	if len(experimentFilenames) > 0 {
-		printComparison(controlFilename, controlData, experimentFilenames, experimentData)
+	if len(cli.ExperimentPaths) > 0 {
+		printComparison(cli.ControlPath, controlData, cli.ExperimentPaths, experimentData, cli.Confidence)
 	}
 }
 
 func printComparison(
 	controlFilename string, controlData []float64,
 	experimentFilenames []string, experimentData map[string][]float64,
+	confidence float64,
 ) {
 	t := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 	_, _ = fmt.Fprintf(t, "File\tN\tMean\tStddev\t\n")
@@ -85,7 +73,7 @@ func printComparison(
 
 	for _, filename := range experimentFilenames {
 		experiment := tinystat.Summarize(experimentData[filename])
-		d := tinystat.Compare(control, experiment, *confidence)
+		d := tinystat.Compare(control, experiment, confidence)
 		p := strings.TrimLeft(fmt.Sprintf("%.3f", d.PValue), "0")
 
 		var results string
@@ -109,8 +97,11 @@ func printComparison(
 	_ = t.Flush()
 }
 
-func readData(controlFilename string, experimentFilenames []string) ([]float64, map[string][]float64, error) {
-	controlData, err := readFile(controlFilename, *column, *delimiter)
+func readData(
+	controlFilename string, experimentFilenames []string,
+	column int, delimiter string,
+) ([]float64, map[string][]float64, error) {
+	controlData, err := readFile(controlFilename, column, delimiter)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -118,7 +109,7 @@ func readData(controlFilename string, experimentFilenames []string) ([]float64, 
 	experimentData := make(map[string][]float64)
 
 	for _, filename := range experimentFilenames {
-		expData, err := readFile(filename, *column, *delimiter)
+		expData, err := readFile(filename, column, delimiter)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -131,7 +122,7 @@ func readData(controlFilename string, experimentFilenames []string) ([]float64, 
 
 func printChart(
 	experimentFilenames []string, controlFilename string, controlData []float64,
-	experimentData map[string][]float64,
+	experimentData map[string][]float64, width, height int,
 ) {
 	c := chart.BoxChart{}
 	c.XRange.Fixed(-1, float64(len(experimentFilenames))+1, 1)
@@ -148,7 +139,7 @@ func printChart(
 		c.AddSet(float64(i+1), experimentData[filename], true)
 	}
 
-	txt := txtg.New(*width, *height)
+	txt := txtg.New(width, height)
 	c.Plot(txt)
 	fmt.Println(txt)
 }

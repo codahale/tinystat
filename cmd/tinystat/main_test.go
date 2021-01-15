@@ -109,6 +109,8 @@ leopard    6  643.50  240.09  (643.50 > 300.00 ± 293.97, p = .026)
 }
 
 func mainTest(t *testing.T, args ...string) string {
+	t.Helper()
+
 	os.Args = append([]string{"tinystat"}, args...)
 
 	f, err := ioutil.TempFile(os.TempDir(), "tinystat")
