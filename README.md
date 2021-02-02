@@ -42,3 +42,9 @@ leopard    6  643.50  240.09  (643.50 > 300.00 ± 293.97, p = .026)
 As you can see, despite the superficial differences between the iguana's scores and the chameleon's
 scores, there is no statistically significant difference between the two at a 95% confidence level.
 The leopard, on the other hand, has statistically significantly different scores.
+
+## License
+
+Copyright © 2021 Coda Hale
+
+Distributed under the Apache License 2.0.
