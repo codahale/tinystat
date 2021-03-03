@@ -27,6 +27,9 @@ jobs:
         uses: golangci/golangci-lint-action@v2.5.1
         with:
           version: v1.37
+          skip-go-installation: true
+          skip-pkg-cache: true
+          skip-build-cache: true
 
       - name: Cross-compile
         uses: goreleaser/goreleaser-action@v2
