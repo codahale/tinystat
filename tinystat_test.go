@@ -3,8 +3,8 @@ package tinystat_test
 import (
 	"testing"
 
+	"github.com/codahale/gubbins/assert"
 	"github.com/codahale/tinystat"
-	"github.com/codahale/tinystat/internal/assert"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"unicode"
 
-	"github.com/codahale/tinystat/internal/assert"
+	"github.com/codahale/gubbins/assert"
 )
 
 //nolint:paralleltest // shared state
